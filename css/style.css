@@ -103,15 +103,6 @@ a:hover {
   padding: 0 1.25rem;
 }
 
-/* On wide screens, sit left-of-centre rather than dead centre */
-@media (min-width: 72rem) {
-  .container,
-  .nav {
-    margin-left: 8vw;
-    margin-right: auto;
-  }
-}
-
 /* ==========================================================================
    Header / nav
    ========================================================================== */
