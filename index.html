@@ -18,7 +18,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css" />
+  <!-- Bump ?v= when styles/scripts change so browsers fetch fresh copies -->
+  <link rel="stylesheet" href="css/style.css?v=2" />
 </head>
 <body>
 
@@ -92,21 +93,18 @@
         </ul>
       </div>
       <!-- Drop your photo at assets/photo.jpg and it appears automatically;
-           until then the sprig stands in on its own. -->
+           until then the branch stands in on its own. -->
       <div class="hero-visual">
-        <svg class="sprig sprig-hero" viewBox="0 0 100 140" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M50 134 C 48 100 52 62 50 10"/>
-          <path d="M50 28 C 38 24 30 14 29 4"/>
-          <path d="M50 28 C 62 24 70 14 71 4"/>
-          <path d="M50 56 C 36 52 27 42 25 30"/>
-          <path d="M50 56 C 64 52 73 42 75 30"/>
-          <path d="M50 86 C 36 82 26 72 23 58"/>
-          <path d="M50 86 C 64 82 74 72 77 58"/>
-          <path d="M50 116 C 36 112 25 102 21 86"/>
-          <path d="M50 116 C 64 112 75 102 79 86"/>
+        <svg class="sprig sprig-hero" width="86" viewBox="0 0 120 150" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M60 145 C 55 110 68 70 57 8"/>
+          <path d="M59 32 C 47 30 39 21 40 10 C 51 12 58 21 59 32 Z"/>
+          <path d="M61 54 C 73 52 81 43 81 32 C 70 34 63 43 61 54 Z"/>
+          <path d="M60 78 C 47 76 38 67 38 55 C 50 57 58 66 60 78 Z"/>
+          <path d="M62 102 C 74 100 83 91 84 79 C 72 81 64 90 62 102 Z"/>
+          <path d="M60 126 C 47 124 38 114 37 101 C 49 104 58 113 60 126 Z"/>
         </svg>
         <img class="hero-photo" src="assets/photo.jpg" alt="Syed Ali Redha Alsagoff"
-             onerror="this.parentElement.classList.add('no-photo')" />
+             onerror="this.style.display='none'; this.parentElement.classList.add('no-photo')" />
       </div>
     </section>
 
@@ -141,24 +139,20 @@
 
   <footer class="site-footer">
     <div class="container">
-      <svg class="sprig sprig-footer" viewBox="0 0 100 140" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M50 134 C 48 100 52 62 50 10"/>
-        <path d="M50 28 C 38 24 30 14 29 4"/>
-        <path d="M50 28 C 62 24 70 14 71 4"/>
-        <path d="M50 56 C 36 52 27 42 25 30"/>
-        <path d="M50 56 C 64 52 73 42 75 30"/>
-        <path d="M50 86 C 36 82 26 72 23 58"/>
-        <path d="M50 86 C 64 82 74 72 77 58"/>
-        <path d="M50 116 C 36 112 25 102 21 86"/>
-        <path d="M50 116 C 64 112 75 102 79 86"/>
+      <svg class="sprig sprig-footer" width="144" viewBox="0 0 220 44" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M6 28 C 50 8 95 38 135 22 C 168 9 195 26 214 16"/>
+        <path d="M40 18 C 38 10 42 4 50 3 C 50 10 46 15 40 18 Z"/>
+        <path d="M82 31 C 80 38 74 42 66 41 C 67 34 73 30 82 31 Z"/>
+        <path d="M122 24 C 120 16 124 10 132 9 C 132 16 128 21 122 24 Z"/>
+        <path d="M186 25 C 185 32 179 36 171 35 C 172 28 178 24 186 25 Z"/>
       </svg>
       <p>© 2026 Syed Ali Redha Alsagoff · <a href="https://github.com/syed-aliredha/syed-aliredha.github.io" target="_blank" rel="noopener">source</a></p>
     </div>
   </footer>
 
-  <script src="js/publications.js"></script>
-  <script src="js/experience.js"></script>
-  <script src="js/posts.js"></script>
-  <script src="js/main.js"></script>
+  <script src="js/publications.js?v=2"></script>
+  <script src="js/experience.js?v=2"></script>
+  <script src="js/posts.js?v=2"></script>
+  <script src="js/main.js?v=2"></script>
 </body>
 </html>

@@ -149,15 +149,32 @@ function formatDate(iso) {
   });
 }
 
-const SPRIG_SVG = `
-  <svg class="sprig" viewBox="0 0 100 140" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+// A few botanical variants so card placeholders don't all look the same
+const SPRIG_SVGS = [
+  // fern
+  `<svg class="sprig" viewBox="0 0 100 140" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <path d="M50 134 C 48 100 52 62 50 10"/>
     <path d="M50 28 C 38 24 30 14 29 4"/><path d="M50 28 C 62 24 70 14 71 4"/>
     <path d="M50 56 C 36 52 27 42 25 30"/><path d="M50 56 C 64 52 73 42 75 30"/>
     <path d="M50 86 C 36 82 26 72 23 58"/><path d="M50 86 C 64 82 74 72 77 58"/>
     <path d="M50 116 C 36 112 25 102 21 86"/><path d="M50 116 C 64 112 75 102 79 86"/>
-  </svg>
-`;
+  </svg>`,
+  // leafy branch
+  `<svg class="sprig" viewBox="0 0 120 150" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M60 145 C 55 110 68 70 57 8"/>
+    <path d="M59 32 C 47 30 39 21 40 10 C 51 12 58 21 59 32 Z"/>
+    <path d="M61 54 C 73 52 81 43 81 32 C 70 34 63 43 61 54 Z"/>
+    <path d="M60 78 C 47 76 38 67 38 55 C 50 57 58 66 60 78 Z"/>
+    <path d="M62 102 C 74 100 83 91 84 79 C 72 81 64 90 62 102 Z"/>
+    <path d="M60 126 C 47 124 38 114 37 101 C 49 104 58 113 60 126 Z"/>
+  </svg>`,
+  // seedling
+  `<svg class="sprig" viewBox="0 0 110 120" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M55 116 C 55 92 55 72 55 52"/>
+    <path d="M55 52 C 38 50 26 38 25 20 C 44 22 55 34 55 52 Z"/>
+    <path d="M55 62 C 70 60 81 50 82 34 C 66 36 56 46 55 62 Z"/>
+  </svg>`,
+];
 
 function postTags(post) {
   return (post.tags || [])
@@ -177,10 +194,11 @@ function postItem(post) {
 }
 
 // Card with image preview — used on the blog index
-function postCard(post) {
+function postCard(post, index) {
+  const sprig = SPRIG_SVGS[index % SPRIG_SVGS.length];
   const visual = post.image
     ? `<img class="post-card-image" src="${escapeHtml(post.image)}" alt="" loading="lazy" />`
-    : `<div class="post-card-placeholder">${SPRIG_SVG}</div>`;
+    : `<div class="post-card-placeholder">${sprig}</div>`;
 
   const summary = post.summary
     ? `<p class="post-card-summary">${escapeHtml(post.summary)}</p>`

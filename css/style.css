@@ -270,9 +270,9 @@ a:hover {
 }
 
 .sprig-footer {
-  width: 2.1rem;
+  width: 9rem;
   height: auto;
-  opacity: 0.45;
+  opacity: 0.5;
   margin-bottom: 0.4rem;
 }
 
@@ -553,6 +553,7 @@ a:hover {
 .empty-note {
   color: var(--text-muted);
   font-style: italic;
+  grid-column: 1 / -1;
 }
 
 /* Card grid used on the blog index */
