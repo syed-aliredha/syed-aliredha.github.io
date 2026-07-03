@@ -12,9 +12,10 @@
   --text-muted: #6f6d66;
   --border: #e4e1d8;
 
-  --accent: #0f766e;
-  --accent-strong: #0d5f59;
-  --accent-tint: rgba(15, 118, 110, 0.09);
+  /* Light mode: burnt amber accent */
+  --accent: #b45309;
+  --accent-strong: #92400a;
+  --accent-tint: rgba(180, 83, 9, 0.09);
 
   --max-width: 50rem;
 }
@@ -26,9 +27,26 @@
   --text-muted: #97948c;
   --border: #2a2c30;
 
+  /* Dark mode: deep teal accent */
   --accent: #2fbdb0;
   --accent-strong: #4fd6c9;
   --accent-tint: rgba(47, 189, 176, 0.12);
+}
+
+/* Theme-switch animation: the new theme sweeps out from the toggle button
+   in a circle (View Transitions API; browsers without it just cross-fade). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* While a view transition drives the switch, per-property transitions
+   would smear the snapshot — pause them for the click. */
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: none !important;
 }
 
 /* ==========================================================================

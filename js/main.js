@@ -4,11 +4,51 @@
 
 const themeToggle = document.getElementById("theme-toggle");
 
+function applyTheme(next) {
+  document.documentElement.setAttribute("data-theme", next);
+  localStorage.setItem("theme", next);
+}
+
 themeToggle.addEventListener("click", () => {
   const current = document.documentElement.getAttribute("data-theme");
   const next = current === "dark" ? "light" : "dark";
-  document.documentElement.setAttribute("data-theme", next);
-  localStorage.setItem("theme", next);
+
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!document.startViewTransition || reducedMotion) {
+    applyTheme(next);
+    return;
+  }
+
+  // Circular reveal: the new theme expands from the toggle button.
+  document.documentElement.classList.add("theme-switching");
+  const transition = document.startViewTransition(() => applyTheme(next));
+
+  transition.ready.then(() => {
+    const rect = themeToggle.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    const radius = Math.hypot(
+      Math.max(x, window.innerWidth - x),
+      Math.max(y, window.innerHeight - y)
+    );
+    document.documentElement.animate(
+      {
+        clipPath: [
+          `circle(0px at ${x}px ${y}px)`,
+          `circle(${radius}px at ${x}px ${y}px)`,
+        ],
+      },
+      {
+        duration: 550,
+        easing: "cubic-bezier(0.4, 0, 0.2, 1)",
+        pseudoElement: "::view-transition-new(root)",
+      }
+    );
+  });
+
+  transition.finished.finally(() => {
+    document.documentElement.classList.remove("theme-switching");
+  });
 });
 
 // ---------------------------------------------------------------------------
