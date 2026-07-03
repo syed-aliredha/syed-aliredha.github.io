@@ -20,7 +20,7 @@ const PUBLICATIONS = [
     authors:
       "Mohor Banerjee, Nadya Yuki Wangsajaya, Syed Ali Redha Alsagoff, M. S. Tan, Z. C. K. Chun, et al.",
     venue: "AAAI 2026 Workshop",
-    note: "AI for Scientific Research",
+    note: "AI for Scientific Research · Outstanding Paper Award",
     year: 2026,
     links: {},
   },
@@ -28,8 +28,8 @@ const PUBLICATIONS = [
     title: "SEA-SpeechBench: A Large-Scale Multitask Benchmark for Speech Understanding Across Southeast Asia",
     authors:
       "J. Liao, W. Zhang, Z. Liu, Y. He, G. Lin, X. Zou, S. Sun, Syed Ali Redha Alsagoff, D. Tao, et al.",
-    venue: "Preprint",
-    note: "",
+    venue: "Under review",
+    note: "EMNLP 2026",
     year: 2026,
     links: {},
   },

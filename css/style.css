@@ -16,7 +16,7 @@
   --accent-strong: #0d5f59;
   --accent-tint: rgba(15, 118, 110, 0.09);
 
-  --max-width: 44rem;
+  --max-width: 50rem;
 }
 
 [data-theme="dark"] {
@@ -29,102 +29,6 @@
   --accent: #2fbdb0;
   --accent-strong: #4fd6c9;
   --accent-tint: rgba(47, 189, 176, 0.12);
-}
-
-/* ==========================================================================
-   TEMP: accent palette preview — remove this whole block after choosing
-   ========================================================================== */
-
-[data-accent="indigo"] {
-  --accent: #4f46e5;
-  --accent-strong: #4338ca;
-  --accent-tint: rgba(79, 70, 229, 0.09);
-}
-
-[data-accent="indigo"][data-theme="dark"] {
-  --accent: #818cf8;
-  --accent-strong: #a5b4fc;
-  --accent-tint: rgba(129, 140, 248, 0.14);
-}
-
-[data-accent="amber"] {
-  --accent: #b45309;
-  --accent-strong: #92400a;
-  --accent-tint: rgba(180, 83, 9, 0.09);
-}
-
-[data-accent="amber"][data-theme="dark"] {
-  --accent: #dd8a2e;
-  --accent-strong: #ecab5c;
-  --accent-tint: rgba(221, 138, 46, 0.13);
-}
-
-[data-accent="crimson"] {
-  --accent: #be123c;
-  --accent-strong: #9f1239;
-  --accent-tint: rgba(190, 18, 60, 0.08);
-}
-
-[data-accent="crimson"][data-theme="dark"] {
-  --accent: #fb7185;
-  --accent-strong: #fda4af;
-  --accent-tint: rgba(251, 113, 133, 0.12);
-}
-
-/* Anthropic-inspired: book-cloth terracotta on warm ivory; canvas shifts too */
-[data-accent="clay"] {
-  --accent: #b25a38;
-  --accent-strong: #94482b;
-  --accent-tint: rgba(204, 120, 92, 0.12);
-  --bg: #f7f5ef;
-  --bg-subtle: #edeade;
-  --border: #e0dccd;
-  --text: #211f1c;
-}
-
-[data-accent="clay"][data-theme="dark"] {
-  --accent: #d98d66;
-  --accent-strong: #e8a986;
-  --accent-tint: rgba(217, 141, 102, 0.13);
-  --bg: #1a1815;
-  --bg-subtle: #24211c;
-  --border: #302c25;
-  --text: #e9e6df;
-}
-
-.palette-preview {
-  position: fixed;
-  bottom: 1.25rem;
-  right: 1.25rem;
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.85rem;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--bg-subtle);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  font-size: 0.78rem;
-  color: var(--text-muted);
-}
-
-.palette-preview button {
-  width: 1.4rem;
-  height: 1.4rem;
-  border-radius: 50%;
-  border: 2px solid transparent;
-  cursor: pointer;
-  padding: 0;
-  transition: transform 0.15s ease;
-}
-
-.palette-preview button:hover {
-  transform: scale(1.15);
-}
-
-.palette-preview button.active {
-  border-color: var(--text);
 }
 
 /* ==========================================================================
@@ -179,6 +83,15 @@ a:hover {
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 0 1.25rem;
+}
+
+/* On wide screens, sit left-of-centre rather than dead centre */
+@media (min-width: 72rem) {
+  .container,
+  .nav {
+    margin-left: 8vw;
+    margin-right: auto;
+  }
 }
 
 /* ==========================================================================
@@ -297,11 +210,52 @@ a:hover {
   margin: 0 0 1.5rem;
 }
 
-.hero-photo {
-  width: 10rem;
-  border-radius: 0.6rem;
+.hero-visual {
+  position: relative;
   flex-shrink: 0;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.hero-photo {
+  position: relative;
+  display: block;
+  width: 10.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+}
+
+/* Botanical sprig peeking out from behind the photo */
+.sprig {
+  color: var(--accent);
+}
+
+.sprig-hero {
+  position: absolute;
+  top: -2.4rem;
+  right: -1.5rem;
+  width: 5.25rem;
+  height: auto;
+  opacity: 0.55;
+  transform: rotate(18deg);
+}
+
+/* No photo yet: the sprig stands alone as a quiet decoration */
+.hero-visual.no-photo .hero-photo {
+  display: none;
+}
+
+.hero-visual.no-photo .sprig-hero {
+  position: static;
+  width: 4.25rem;
+  opacity: 0.45;
+  transform: rotate(12deg);
+}
+
+.sprig-footer {
+  width: 2.1rem;
+  height: auto;
+  opacity: 0.45;
+  margin-bottom: 0.4rem;
 }
 
 .contact-links {
@@ -583,6 +537,121 @@ a:hover {
   font-style: italic;
 }
 
+/* Card grid used on the blog index */
+.post-grid {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 1.25rem;
+}
+
+.post-card {
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: var(--bg);
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.post-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.09);
+}
+
+.post-card > a {
+  display: block;
+  color: inherit;
+  border-bottom: none;
+}
+
+.post-card-image,
+.post-card-placeholder {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  display: block;
+}
+
+.post-card-image {
+  object-fit: cover;
+  background: var(--bg-subtle);
+}
+
+/* Shown when a post has no image yet: soft tint with a sprig */
+.post-card-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--accent-tint), var(--bg-subtle));
+}
+
+.post-card-placeholder .sprig {
+  width: 2.4rem;
+  opacity: 0.55;
+  transform: rotate(12deg);
+}
+
+.post-card-body {
+  padding: 1rem 1.15rem 1.2rem;
+}
+
+.post-card-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.6rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+}
+
+.post-card-title {
+  font-family: var(--font-heading);
+  font-size: 1.18rem;
+  font-weight: 500;
+  margin: 0 0 0.35rem;
+  color: var(--text);
+}
+
+.post-card:hover .post-card-title {
+  color: var(--accent-strong);
+}
+
+.post-card-summary {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Individual blog post pages */
+.post-header {
+  padding: 3rem 0 0;
+}
+
+.post-header h1 {
+  font-size: 2rem;
+  margin-bottom: 0.4rem;
+}
+
+.post-header .post-card-meta {
+  font-size: 0.85rem;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.post-content img {
+  max-width: 100%;
+  border-radius: 0.6rem;
+}
+
 @media (max-width: 600px) {
   .post-item {
     flex-wrap: wrap;
@@ -605,8 +674,7 @@ a:hover {
 .site-footer {
   border-top: 1px solid var(--border);
   margin-top: 3rem;
-  padding: 1.5rem 1.25rem 2rem;
-  text-align: center;
+  padding: 1.5rem 0 2rem;
   font-size: 0.85rem;
   color: var(--text-muted);
 }

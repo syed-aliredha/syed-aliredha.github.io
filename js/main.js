@@ -109,15 +109,56 @@ function formatDate(iso) {
   });
 }
 
-function postItem(post) {
-  const tags = (post.tags || [])
+const SPRIG_SVG = `
+  <svg class="sprig" viewBox="0 0 100 140" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M50 134 C 48 100 52 62 50 10"/>
+    <path d="M50 28 C 38 24 30 14 29 4"/><path d="M50 28 C 62 24 70 14 71 4"/>
+    <path d="M50 56 C 36 52 27 42 25 30"/><path d="M50 56 C 64 52 73 42 75 30"/>
+    <path d="M50 86 C 36 82 26 72 23 58"/><path d="M50 86 C 64 82 74 72 77 58"/>
+    <path d="M50 116 C 36 112 25 102 21 86"/><path d="M50 116 C 64 112 75 102 79 86"/>
+  </svg>
+`;
+
+function postTags(post) {
+  return (post.tags || [])
     .map((t) => `<span class="post-tag">${escapeHtml(t)}</span>`)
     .join("");
+}
+
+// Compact row — used for the home page's recent list
+function postItem(post) {
   return `
     <li class="post-item">
       <span class="post-date">${formatDate(post.date)}</span>
       <a class="post-title" href="${escapeHtml(post.url)}">${escapeHtml(post.title)}</a>
-      <span class="post-tags">${tags}</span>
+      <span class="post-tags">${postTags(post)}</span>
+    </li>
+  `;
+}
+
+// Card with image preview — used on the blog index
+function postCard(post) {
+  const visual = post.image
+    ? `<img class="post-card-image" src="${escapeHtml(post.image)}" alt="" loading="lazy" />`
+    : `<div class="post-card-placeholder">${SPRIG_SVG}</div>`;
+
+  const summary = post.summary
+    ? `<p class="post-card-summary">${escapeHtml(post.summary)}</p>`
+    : "";
+
+  return `
+    <li class="post-card">
+      <a href="${escapeHtml(post.url)}">
+        ${visual}
+        <div class="post-card-body">
+          <div class="post-card-meta">
+            <span>${formatDate(post.date)}</span>
+            ${postTags(post)}
+          </div>
+          <p class="post-card-title">${escapeHtml(post.title)}</p>
+          ${summary}
+        </div>
+      </a>
     </li>
   `;
 }
@@ -133,12 +174,12 @@ function renderPosts() {
     document.getElementById("writing").hidden = false;
   }
 
-  // Blog page: show everything, or a friendly empty state.
+  // Blog page: card grid, or a friendly empty state.
   const all = document.getElementById("all-posts");
   if (all) {
     all.innerHTML =
       sorted.length > 0
-        ? sorted.map(postItem).join("")
+        ? sorted.map(postCard).join("")
         : `<li class="empty-note">Nothing here yet — first post coming soon.</li>`;
   }
 }
