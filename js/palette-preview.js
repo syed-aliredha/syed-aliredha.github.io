@@ -8,6 +8,7 @@
     { id: "indigo", label: "Indigo", swatch: "#4f46e5" },
     { id: "amber", label: "Burnt amber", swatch: "#b45309" },
     { id: "crimson", label: "Crimson", swatch: "#be123c" },
+    { id: "clay", label: "Clay (Anthropic)", swatch: "#cc785c" },
   ];
 
   const root = document.documentElement;
