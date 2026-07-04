@@ -250,15 +250,26 @@ a:hover {
   transform: rotate(18deg);
 }
 
-/* No photo yet: the sprig stands alone as a quiet decoration */
+/* No photo yet: a photo-sized frame with the sprig inside marks the spot */
+.hero-visual.no-photo {
+  width: 10.5rem;
+  aspect-ratio: 1 / 1;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, var(--accent-tint), var(--bg-subtle));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .hero-visual.no-photo .hero-photo {
   display: none;
 }
 
 .hero-visual.no-photo .sprig-hero {
   position: static;
-  width: 4.25rem;
-  opacity: 0.45;
+  width: 4.5rem;
+  opacity: 0.55;
   transform: rotate(12deg);
 }
 
