@@ -11,8 +11,7 @@ const PUBLICATIONS = [
     note: "Main conference",
     year: 2026,
     links: {
-      // paper: "https://...",
-      // code: "https://github.com/...",
+      paper: "https://aclanthology.org/2026.acl-long.1061.pdf"
     },
   },
   {
@@ -22,7 +21,9 @@ const PUBLICATIONS = [
     venue: "AAAI 2026 Workshop",
     note: "AI for Scientific Research · Outstanding Paper Award",
     year: 2026,
-    links: {},
+    links: {
+      paper: "https://arxiv.org/abs/2512.11509"
+    },
   },
   {
     title: "SEA-SpeechBench: A Large-Scale Multitask Benchmark for Speech Understanding Across Southeast Asia",
@@ -31,6 +32,8 @@ const PUBLICATIONS = [
     venue: "Under review",
     note: "EMNLP 2026",
     year: 2026,
-    links: {},
+    links: {
+      paper: "https://openreview.net/forum?id=YVFNC9aEuQ"
+    },
   },
 ];

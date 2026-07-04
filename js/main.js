@@ -77,24 +77,22 @@ function renderPublications() {
       ? `<span class="publication-note">${escapeHtml(pub.note)}</span>`
       : "";
 
-    const links = Object.entries(pub.links || {})
-      .map(
-        ([label, url]) =>
-          `<a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(label)}</a>`
-      )
-      .join("");
-
-    return `
-      <li class="publication">
-        <p class="publication-title">${escapeHtml(pub.title)}</p>
-        <p class="publication-authors">${authors}</p>
-        <div class="publication-meta">
-          <span class="venue-tag">${escapeHtml(pub.venue)}</span>
-          ${note}
-          <span class="publication-links">${links}</span>
-        </div>
-      </li>
+    const body = `
+      <p class="publication-title">${escapeHtml(pub.title)}</p>
+      <p class="publication-authors">${authors}</p>
+      <div class="publication-meta">
+        <span class="venue-tag">${escapeHtml(pub.venue)}</span>
+        ${note}
+      </div>
     `;
+
+    // With a paper link, the whole highlighted block is the click target
+    const paper = pub.links && pub.links.paper;
+    const wrapped = paper
+      ? `<a class="publication-body" href="${escapeHtml(paper)}" target="_blank" rel="noopener">${body}</a>`
+      : `<div class="publication-body">${body}</div>`;
+
+    return `<li class="publication">${wrapped}</li>`;
   }).join("");
 }
 

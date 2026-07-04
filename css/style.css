@@ -273,6 +273,20 @@ a:hover {
   transform: rotate(12deg);
 }
 
+/* Small caption under the hero photo */
+.hero-caption {
+  margin: 0.55rem 0 0;
+  max-width: 10.5rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.hero-visual.no-photo .hero-caption {
+  display: none;
+}
+
 .sprig-footer {
   width: 9rem;
   height: auto;
@@ -313,7 +327,6 @@ a:hover {
 }
 
 .publication {
-  padding: 1rem 1.1rem;
   margin: 0 -1.1rem;
   border-radius: 0.6rem;
   border-left: 2px solid transparent;
@@ -323,6 +336,22 @@ a:hover {
 .publication:hover {
   background: var(--bg-subtle);
   border-left-color: var(--accent);
+}
+
+/* Whole block is clickable when the paper has a link */
+.publication-body {
+  display: block;
+  padding: 1rem 1.1rem;
+  color: inherit;
+  border-bottom: none;
+}
+
+a.publication-body:hover {
+  border-bottom: none;
+}
+
+a.publication-body:hover .publication-title {
+  color: var(--accent-strong);
 }
 
 .publication-title {
@@ -359,14 +388,6 @@ a:hover {
   font-weight: 500;
 }
 
-.publication-links a {
-  color: var(--text-muted);
-  margin-right: 0.6rem;
-}
-
-.publication-links a:hover {
-  color: var(--accent-strong);
-}
 
 /* ==========================================================================
    Experience timeline
