@@ -182,13 +182,16 @@ function postTags(post) {
     .join("");
 }
 
-// Compact row — used for the home page's recent list
+// Compact row — used for the home page's recent list. The whole row is the
+// click target; rows are separated by hairlines.
 function postItem(post) {
   return `
     <li class="post-item">
-      <span class="post-date">${formatDate(post.date)}</span>
-      <a class="post-title" href="${escapeHtml(post.url)}">${escapeHtml(post.title)}</a>
-      <span class="post-tags">${postTags(post)}</span>
+      <a class="post-item-link" href="${escapeHtml(post.url)}">
+        <span class="post-date">${formatDate(post.date)}</span>
+        <span class="post-title">${escapeHtml(post.title)}</span>
+        <span class="post-tags">${postTags(post)}</span>
+      </a>
     </li>
   `;
 }

@@ -478,15 +478,33 @@ a:hover {
 }
 
 .post-item {
-  display: flex;
-  align-items: baseline;
-  gap: 1rem;
-  padding: 0.75rem 0;
   border-bottom: 1px solid var(--border);
 }
 
 .post-item:last-child {
   border-bottom: none;
+}
+
+/* The whole row is one clickable block */
+.post-item-link {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.85rem 0.6rem;
+  margin: 0 -0.6rem;
+  border-radius: 0.5rem;
+  border-bottom: none;
+  color: inherit;
+  transition: background 0.15s ease;
+}
+
+.post-item-link:hover {
+  background: var(--bg-subtle);
+  border-bottom: none;
+}
+
+.post-item-link:hover .post-title {
+  color: var(--accent-strong);
 }
 
 .post-date {
@@ -608,7 +626,8 @@ a:hover {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
-  margin: 0 0 0.55rem;
+  /* outdent by the pill's own padding so the tag text aligns with the date */
+  margin: 0 0 0.55rem -0.5rem;
 }
 
 .post-card-title {
@@ -726,7 +745,7 @@ a:hover {
 }
 
 @media (max-width: 600px) {
-  .post-item {
+  .post-item-link {
     flex-wrap: wrap;
     gap: 0.2rem 1rem;
   }
