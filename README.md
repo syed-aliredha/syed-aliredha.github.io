@@ -7,6 +7,7 @@ Live at **https://syed-aliredha.github.io**.
 
 - [ ] **Profile picture** — drop a roughly square image at `assets/photo.jpg`, commit, push. Nothing else needed.
 - [ ] **Publication links** — add `paper:`/`code:` URLs in `js/publications.js` once they're public.
+- [ ] **Tag search/filter on the blog** — once there are enough posts to warrant it, add click-to-filter on the card tags (all data is already in `js/posts.js`).
 - [x] **Comments** — Cusdis is live; moderate from the [cusdis.com](https://cusdis.com) dashboard.
 
 ## Where everything lives

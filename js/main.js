@@ -204,10 +204,6 @@ function postCard(post, index) {
     ? `<p class="post-card-summary">${escapeHtml(post.summary)}</p>`
     : "";
 
-  const hashtags = (post.tags || [])
-    .map((t) => `<span class="post-hash">#${escapeHtml(t.toLowerCase())}</span>`)
-    .join("");
-
   return `
     <li class="post-card">
       <a href="${escapeHtml(post.url)}">
@@ -216,8 +212,8 @@ function postCard(post, index) {
           <div class="post-card-meta">
             <span>${formatDate(post.date)}</span>
             <span class="post-minutes" data-url="${escapeHtml(post.url)}"></span>
-            ${hashtags}
           </div>
+          <div class="post-card-tags">${postTags(post)}</div>
           <p class="post-card-title">${escapeHtml(post.title)}</p>
           ${summary}
         </div>
@@ -312,6 +308,34 @@ buildToc();
 // the site's light/dark toggle.
 // ---------------------------------------------------------------------------
 
+// The Cusdis widget renders into a same-origin iframe, so we can match the
+// site font and grow the frame to fit its content (no inner scrollbar).
+function styleCommentsFrame(iframe) {
+  const doc = iframe.contentDocument;
+  if (!doc || !doc.body) return;
+
+  if (!doc.getElementById("site-font-patch")) {
+    const link = doc.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap";
+    doc.head.appendChild(link);
+
+    const style = doc.createElement("style");
+    style.id = "site-font-patch";
+    style.textContent =
+      "body, button, input, textarea { font-family: 'Inter', -apple-system, 'Segoe UI', sans-serif !important; }" +
+      "body { overflow: hidden; }";
+    doc.head.appendChild(style);
+
+    iframe.setAttribute("scrolling", "no");
+    new iframe.contentWindow.ResizeObserver(() => {
+      iframe.style.height = doc.body.scrollHeight + "px";
+    }).observe(doc.body);
+  }
+
+  iframe.style.height = doc.body.scrollHeight + "px";
+}
+
 function initComments() {
   const thread = document.getElementById("cusdis_thread");
   if (!thread) return;
@@ -326,10 +350,24 @@ function initComments() {
 
   new MutationObserver(() => {
     if (window.CUSDIS) window.CUSDIS.setTheme(currentTheme());
+    setTimeout(() => {
+      const iframe = thread.querySelector("iframe");
+      if (iframe) styleCommentsFrame(iframe);
+    }, 400);
   }).observe(document.documentElement, {
     attributes: true,
     attributeFilter: ["data-theme"],
   });
+
+  // The widget mounts asynchronously — patch it as soon as it appears.
+  const watch = setInterval(() => {
+    const iframe = thread.querySelector("iframe");
+    if (iframe && iframe.contentDocument && iframe.contentDocument.body) {
+      styleCommentsFrame(iframe);
+      if (iframe.contentDocument.getElementById("site-font-patch")) clearInterval(watch);
+    }
+  }, 300);
+  setTimeout(() => clearInterval(watch), 15000);
 }
 
 initComments();

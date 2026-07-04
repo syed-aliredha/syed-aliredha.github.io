@@ -17,7 +17,7 @@
   --accent-strong: #92400a;
   --accent-tint: rgba(180, 83, 9, 0.09);
 
-  --max-width: 50rem;
+  --max-width: 53rem;
 }
 
 [data-theme="dark"] {
@@ -591,7 +591,7 @@ a:hover {
 }
 
 .post-card-body {
-  padding: 1rem 1.15rem 1.2rem;
+  padding: 1.1rem 1.15rem 1.35rem;
 }
 
 .post-card-meta {
@@ -604,9 +604,11 @@ a:hover {
   margin-bottom: 0.4rem;
 }
 
-.post-hash {
-  color: var(--accent);
-  font-weight: 500;
+.post-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 0.55rem;
 }
 
 .post-card-title {
@@ -710,6 +712,7 @@ a:hover {
 
 .comments-section iframe {
   width: 100%;
+  border: 0;
 }
 
 .post-content blockquote {
