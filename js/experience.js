@@ -28,14 +28,6 @@ const EXPERIENCE = [
     desc: "Research attachment on balancing creativity and hallucination in LLMs — published at an ICLR 2025 workshop, extended to ACL 2026 (main), and won an Outstanding Paper Award at the AAAI 2026 Workshop on AI for Scientific Research.",
   },
   {
-    role: "Introduction to Research",
-    org: "Nanyang Technological University",
-    url: "https://www.ntu.edu.sg/",
-    period: "Aug 2023 — Nov 2023",
-    tag: "Research",
-    desc: "Literature review on CNN architectures for computer vision, from AlexNet through ResNet, InceptionNet, and EfficientNet.",
-  },
-  {
     role: "B.Comp (Hons) in Computer Science",
     org: "Nanyang Technological University, Singapore",
     url: "https://www.ntu.edu.sg/computing",
