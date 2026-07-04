@@ -6,7 +6,7 @@ const PUBLICATIONS = [
   {
     title: "Automated Creativity Evaluation of Language Models Across Open-Ended Tasks",
     authors:
-      "T. M. Sen, Z. C. K. Chun, Syed Ali Redha Alsagoff, Nadya Yuki Wangsajaya, Mohor Banerjee, S. B. Saikia, et al.",
+      "T. M. Sen*, Z. C. K. Chun*, Syed Ali Redha Alsagoff, Nadya Yuki Wangsajaya, Mohor Banerjee, S. B. Saikia, et al.",
     venue: "ACL 2026",
     note: "Main conference",
     year: 2026,
@@ -18,7 +18,7 @@ const PUBLICATIONS = [
   {
     title: "Does Less Hallucination Mean Less Creativity? An Empirical Investigation in LLMs",
     authors:
-      "Mohor Banerjee, Nadya Yuki Wangsajaya, Syed Ali Redha Alsagoff, M. S. Tan, Z. C. K. Chun, et al.",
+      "Syed Ali Redha Alsagoff*, Mohor Banerjee*, Nadya Yuki Wangsajaya*, M. S. Tan, Z. C. K. Chun, et al.",
     venue: "AAAI 2026 Workshop",
     note: "AI for Scientific Research · Outstanding Paper Award",
     year: 2026,
