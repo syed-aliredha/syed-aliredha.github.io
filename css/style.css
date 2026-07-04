@@ -230,29 +230,27 @@ a:hover {
 .hero-photo {
   position: relative;
   display: block;
-  width: 10.5rem;
+  width: 12.5rem;
   border-radius: 0.75rem;
   border: 1px solid var(--border);
 }
 
-/* Botanical sprig peeking out from behind the photo */
 .sprig {
   color: var(--accent);
 }
 
+/* The hero sprig only shows as the fallback when there's no photo */
 .sprig-hero {
-  position: absolute;
-  top: -2.4rem;
-  right: -1.5rem;
+  display: none;
   width: 5.25rem;
   height: auto;
   opacity: 0.55;
   transform: rotate(18deg);
 }
 
-/* No photo yet: a photo-sized frame with the sprig inside marks the spot */
+/* No photo: a photo-sized frame with the sprig inside marks the spot */
 .hero-visual.no-photo {
-  width: 10.5rem;
+  width: 12.5rem;
   aspect-ratio: 1 / 1;
   border: 1px solid var(--border);
   border-radius: 0.75rem;
@@ -267,7 +265,7 @@ a:hover {
 }
 
 .hero-visual.no-photo .sprig-hero {
-  position: static;
+  display: block;
   width: 4.5rem;
   opacity: 0.55;
   transform: rotate(12deg);
@@ -275,9 +273,9 @@ a:hover {
 
 /* Small caption under the hero photo */
 .hero-caption {
-  margin: 0.55rem 0 0;
-  max-width: 10.5rem;
-  font-size: 0.75rem;
+  margin: 0.6rem 0 0;
+  max-width: 12.5rem;
+  font-size: 0.82rem;
   line-height: 1.5;
   color: var(--text-muted);
   text-align: center;
@@ -805,7 +803,7 @@ a.publication-body:hover .publication-title {
   }
 
   .hero-photo {
-    width: 8rem;
+    width: 9.5rem;
   }
 
   .nav-right {
