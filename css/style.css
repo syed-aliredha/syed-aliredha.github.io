@@ -604,6 +604,11 @@ a:hover {
   margin-bottom: 0.4rem;
 }
 
+.post-hash {
+  color: var(--accent);
+  font-weight: 500;
+}
+
 .post-card-title {
   font-family: var(--font-heading);
   font-size: 1.18rem;

@@ -204,6 +204,10 @@ function postCard(post, index) {
     ? `<p class="post-card-summary">${escapeHtml(post.summary)}</p>`
     : "";
 
+  const hashtags = (post.tags || [])
+    .map((t) => `<span class="post-hash">#${escapeHtml(t.toLowerCase())}</span>`)
+    .join("");
+
   return `
     <li class="post-card">
       <a href="${escapeHtml(post.url)}">
@@ -211,7 +215,8 @@ function postCard(post, index) {
         <div class="post-card-body">
           <div class="post-card-meta">
             <span>${formatDate(post.date)}</span>
-            ${postTags(post)}
+            <span class="post-minutes" data-url="${escapeHtml(post.url)}"></span>
+            ${hashtags}
           </div>
           <p class="post-card-title">${escapeHtml(post.title)}</p>
           ${summary}
@@ -219,6 +224,21 @@ function postCard(post, index) {
       </a>
     </li>
   `;
+}
+
+// Estimated reading time, computed from each post's actual text (~200 wpm)
+async function fillReadingTimes() {
+  for (const span of document.querySelectorAll(".post-minutes[data-url]")) {
+    try {
+      const res = await fetch(span.dataset.url);
+      const doc = new DOMParser().parseFromString(await res.text(), "text/html");
+      const text = doc.querySelector(".post-content")?.textContent || "";
+      const words = text.trim().split(/\s+/).length;
+      span.textContent = `· ${Math.max(1, Math.round(words / 200))} min read`;
+    } catch {
+      // leave blank if the post can't be fetched
+    }
+  }
 }
 
 function renderPosts() {
@@ -239,6 +259,7 @@ function renderPosts() {
       sorted.length > 0
         ? sorted.map(postCard).join("")
         : `<li class="empty-note">Nothing here yet — first post coming soon.</li>`;
+    fillReadingTimes();
   }
 }
 

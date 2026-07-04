@@ -6,8 +6,8 @@ Live at **https://syed-aliredha.github.io**.
 ## TODO
 
 - [ ] **Profile picture** — drop a roughly square image at `assets/photo.jpg`, commit, push. Nothing else needed.
-- [ ] **Enable comments** — create a free site at [cusdis.com](https://cusdis.com) (Dashboard → New Website, domain `syed-aliredha.github.io`), copy the App ID, and replace `YOUR_CUSDIS_APP_ID` in `blog/hello-world.html` and `blog/_post-template.html`. The Comments section stays hidden until then. Moderate comments from the Cusdis dashboard.
 - [ ] **Publication links** — add `paper:`/`code:` URLs in `js/publications.js` once they're public.
+- [x] **Comments** — Cusdis is live; moderate from the [cusdis.com](https://cusdis.com) dashboard.
 
 ## Where everything lives
 
