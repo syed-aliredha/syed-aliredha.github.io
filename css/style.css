@@ -127,21 +127,23 @@ a:hover {
   gap: 1rem;
 }
 
-.nav-name {
-  font-family: var(--font-heading);
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: var(--text);
-  border-bottom: none;
+.nav-icons {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
-.nav-name:hover {
-  color: var(--accent);
+.nav-icons a {
+  display: inline-flex;
+  color: var(--text-muted);
   border-bottom: none;
+  transition: color 0.15s ease, transform 0.15s ease;
 }
 
-.accent-dot {
+.nav-icons a:hover {
   color: var(--accent);
+  border-bottom: none;
+  transform: translateY(-1px);
 }
 
 .nav-right {
@@ -267,33 +269,7 @@ a:hover {
   margin-bottom: 0.4rem;
 }
 
-.contact-links {
-  list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  padding: 0;
-  margin: 1.75rem 0 0;
-}
-
-.contact-links a {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.35rem 0.8rem;
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
-}
-
-.contact-links a:hover {
-  color: var(--accent-strong);
-  border-color: var(--accent);
-  background: var(--accent-tint);
-  transform: translateY(-1px);
-}
+/* Contact links now live as icons in the nav (top-left corner) */
 
 /* ==========================================================================
    Sections
@@ -660,6 +636,54 @@ a:hover {
 .post-content img {
   max-width: 100%;
   border-radius: 0.6rem;
+}
+
+.post-content h2 {
+  margin-top: 2.25rem;
+}
+
+.post-content h3 {
+  margin-top: 1.5rem;
+}
+
+/* Auto-generated table of contents on post pages */
+.toc {
+  margin: 1.75rem 0 0.5rem;
+  padding: 0.9rem 1.2rem;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  font-size: 0.92rem;
+}
+
+.toc summary {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: 1.02rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.toc ul {
+  list-style: none;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.toc li.toc-sub {
+  padding-left: 1.1rem;
+}
+
+.toc a {
+  color: var(--text-muted);
+  border-bottom: none;
+}
+
+.toc a:hover {
+  color: var(--accent-strong);
 }
 
 .post-content blockquote {

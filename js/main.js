@@ -243,3 +243,45 @@ function renderPosts() {
 }
 
 renderPosts();
+
+// ---------------------------------------------------------------------------
+// Blog post pages: auto table of contents, built from h2/h3 in .post-content.
+// Appears only when a post has 2+ headings — nothing to maintain by hand.
+// ---------------------------------------------------------------------------
+
+function buildToc() {
+  const content = document.querySelector(".post-content");
+  if (!content) return;
+  const headings = content.querySelectorAll("h2, h3");
+  if (headings.length < 2) return;
+
+  const toc = document.createElement("details");
+  toc.className = "toc";
+  toc.open = true;
+  const summary = document.createElement("summary");
+  summary.textContent = "Contents";
+  toc.appendChild(summary);
+
+  const list = document.createElement("ul");
+  headings.forEach((h) => {
+    if (!h.id) {
+      h.id = h.textContent
+        .trim()
+        .toLowerCase()
+        .replace(/[^\w]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+    }
+    const li = document.createElement("li");
+    if (h.tagName === "H3") li.className = "toc-sub";
+    const a = document.createElement("a");
+    a.href = "#" + h.id;
+    a.textContent = h.textContent;
+    li.appendChild(a);
+    list.appendChild(li);
+  });
+
+  toc.appendChild(list);
+  content.parentElement.insertBefore(toc, content);
+}
+
+buildToc();
