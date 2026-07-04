@@ -16,4 +16,12 @@
 //   summary: "One-line teaser shown on the card.",
 // },
 
-const POSTS = [];
+const POSTS = [
+  {
+    title: "Hello, world",
+    date: "2026-07-04",
+    url: "/blog/hello-world.html",
+    tags: ["meta"],
+    summary: "What this blog is for, and a quick tour of how the site is put together.",
+  },
+];

@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Blog · Syed Ali Redha Alsagoff</title>
-  <meta name="description" content="Writing on AI research — LLMs, NLP, and multimodal AI — by Syed Ali Redha Alsagoff." />
+  <title>Hello, world · Syed Ali Redha Alsagoff</title>
+  <meta name="description" content="First post — what this blog is for, and a quick tour of how the site is put together." />
 
-  <!-- Set theme before first paint to avoid a flash of the wrong mode -->
   <script>
     (function () {
       var stored = localStorage.getItem("theme");
@@ -18,7 +17,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-  <!-- Bump ?v= when styles/scripts change so browsers fetch fresh copies -->
   <link rel="stylesheet" href="/css/style.css?v=3" />
 </head>
 <body>
@@ -44,12 +42,50 @@
   </header>
 
   <main class="container">
-    <section class="section">
-      <h2>Blog</h2>
-      <p>Notes and longer-form thoughts on research — mostly LLMs, evaluation, and multimodal AI.</p>
-      <ul id="all-posts" class="post-grid"></ul>
-      <noscript><p>Posts are rendered with JavaScript.</p></noscript>
-    </section>
+    <article>
+      <header class="post-header">
+        <a class="back-link" href="/blog/">← back to blog</a>
+        <h1>Hello, world</h1>
+        <div class="post-card-meta">
+          <span>4 Jul 2026</span>
+          <span class="post-tag">meta</span>
+        </div>
+      </header>
+
+      <div class="post-content">
+        <p>
+          Welcome to the blog. The plan for this space is to write about things I'm
+          reading and working on in AI research — LLM evaluation, creativity and
+          hallucination, speech models for Southeast Asia, and whatever else catches
+          my attention along the way.
+        </p>
+
+        <h2>What to expect</h2>
+        <p>Roughly three kinds of posts:</p>
+        <ul>
+          <li><strong>Paper notes</strong> — short summaries of papers I found worth the read.</li>
+          <li><strong>Research threads</strong> — longer-form thoughts on open questions.</li>
+          <li><strong>Build logs</strong> — occasional notes on tools and projects, like this site.</li>
+        </ul>
+
+        <h2>A small note on the design</h2>
+        <p>
+          This site is hand-written HTML, CSS, and a little JavaScript — no framework,
+          no build step. Posts are plain HTML pages, so anything works in them:
+          links like <a href="https://scholar.google.com/citations?user=_CiUcHgAAAAJ&hl=en">this one</a>,
+          images, and quotes:
+        </p>
+        <blockquote>
+          The real problem is not whether machines think but whether men do.
+          <br />— B. F. Skinner
+        </blockquote>
+        <p>
+          If you're curious, the source is on
+          <a href="https://github.com/syed-aliredha/syed-aliredha.github.io">GitHub</a>.
+          More soon.
+        </p>
+      </div>
+    </article>
   </main>
 
   <footer class="site-footer">
