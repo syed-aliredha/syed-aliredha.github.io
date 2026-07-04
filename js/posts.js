@@ -21,6 +21,7 @@ const POSTS = [
     title: "Hello, world",
     date: "2026-07-04",
     url: "/blog/hello-world.html",
+    image: "/assets/blog/hello-world.jpg",
     tags: ["meta"],
     summary: "What this blog is for, and the kinds of posts to expect.",
   },
