@@ -285,3 +285,30 @@ function buildToc() {
 }
 
 buildToc();
+
+// ---------------------------------------------------------------------------
+// Comments (Cusdis) — hidden until a real App ID is configured; theme follows
+// the site's light/dark toggle.
+// ---------------------------------------------------------------------------
+
+function initComments() {
+  const thread = document.getElementById("cusdis_thread");
+  if (!thread) return;
+
+  if (thread.dataset.appId === "YOUR_CUSDIS_APP_ID") {
+    thread.closest(".comments-section").hidden = true;
+    return;
+  }
+
+  const currentTheme = () => document.documentElement.getAttribute("data-theme");
+  thread.dataset.theme = currentTheme();
+
+  new MutationObserver(() => {
+    if (window.CUSDIS) window.CUSDIS.setTheme(currentTheme());
+  }).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-theme"],
+  });
+}
+
+initComments();
