@@ -18,7 +18,7 @@
 
 const POSTS = [
   {
-    title: "Hello, world",
+    title: "Hello, World",
     date: "2026-07-04",
     url: "/blog/hello-world.html",
     image: "/assets/blog/hello-world.jpg",
