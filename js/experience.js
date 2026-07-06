@@ -17,7 +17,7 @@ const EXPERIENCE = [
     url: "https://www.ed.ac.uk/",
     period: "Jan 2026 — May 2026",
     tag: "Education",
-    desc: "Semester exchange — coursework in Advanced Topics in NLP and ML, Computer Vision, and Methods for Causal Inference.",
+    desc: "Semester exchange. Completed coursework in Advanced Topics in NLP and ML, Computer Vision, and Methods for Causal Inference.",
   },
   {
     role: "Research Intern, SEA-AudioBench",
@@ -31,9 +31,9 @@ const EXPERIENCE = [
     role: "Undergraduate Researcher",
     org: "College of Computing and Data Science, NTU",
     url: "https://www.ntu.edu.sg/computing",
-    period: "Jul 2024 — present",
+    period: "Jul 2024 — Nov 2025",
     tag: "Research",
-    desc: "Research attachment on balancing creativity and hallucination in LLMs — published at an ICLR 2025 workshop, extended to ACL 2026 (main), and won an Outstanding Paper Award at the AAAI 2026 Workshop on AI for Scientific Research.",
+    desc: "Research attachment on the topic of balancing creativity and hallucination in LLMs. Published at an ICLR 2025 workshop, extended to ACL 2026 (main) and presented there. Won an Outstanding Paper Award at the AAAI 2026 Workshop on AI for Scientific Research for another paper.",
   },
   {
     role: "B.Comp (Hons) in Computer Science",
@@ -41,6 +41,6 @@ const EXPERIENCE = [
     url: "https://www.ntu.edu.sg/computing",
     period: "Aug 2023 — Jun 2027 (expected)",
     tag: "Education",
-    desc: "CN Yang Scholars Programme · cGPA 5.00/5.00 · Dean's List AY23/24 and AY24/25.",
+    desc: "CN Yang Scholars Programme · Dean's List AY23/24 and AY24/25.",
   },
 ];
