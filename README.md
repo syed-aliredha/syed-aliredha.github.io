@@ -5,7 +5,6 @@ Live at **https://syed-aliredha.github.io**.
 
 ## TODO
 - [ ] **Tag search/filter on the blog** — once there are enough posts to warrant it, add click-to-filter on the card tags (all data is already in `js/posts.js`).
-- [ ] **Optimise for mobile** - adjust layout for mobile viewing. Looks ehh now, but can be better
 
 ## Where everything lives
 
