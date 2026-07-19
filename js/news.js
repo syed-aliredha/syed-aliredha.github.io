@@ -13,6 +13,6 @@
 const NEWS = [
   {
     date: "2026-07-04",
-    text: "Launched this site, along with a [blog](/blog/).",
+    text: "Launched this site, along with my [blog](/blog/).",
   },
 ];

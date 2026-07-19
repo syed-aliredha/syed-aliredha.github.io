@@ -861,16 +861,87 @@ a.publication-body:hover .publication-title {
 @media (max-width: 600px) {
   h1 { font-size: 1.9rem; }
 
+  /* Two-row header taller than desktop's — keep anchor targets clear of it */
+  html {
+    scroll-padding-top: 7rem;
+  }
+
+  /* Stack the hero: name and subtitle first, then the centred portrait,
+     then the intro paragraphs. display:contents lifts the text block's
+     children into the flex column so the photo can slot between them. */
   .hero {
-    flex-direction: column-reverse;
+    flex-direction: column;
+    gap: 0; /* spacing comes from the children's own margins */
     padding-top: 2.5rem;
   }
 
+  .hero-text {
+    display: contents;
+  }
+
+  .hero h1 { order: 1; }
+  .hero .hero-subtitle { order: 2; margin-bottom: 0.5rem; }
+  .hero .hero-visual { order: 3; }
+  .hero .hero-text p:not(.hero-subtitle) { order: 4; }
+
+  .hero-visual {
+    align-self: center;
+    margin: 0.5rem 0 1.25rem;
+  }
+
+  /* The caption below is wider than the photo, so the photo needs its own
+     centring inside the visual block */
   .hero-photo {
-    width: 9.5rem;
+    width: 11rem;
+    margin: 0 auto;
+  }
+
+  /* Subtitle stacks as two clean lines: role, then university — no dangling
+     separator dot */
+  .subtitle-sep {
+    display: none;
+  }
+
+  .subtitle-org {
+    display: block;
+  }
+
+  /* Caption may run wider than the photo, but never to a third line */
+  .hero-caption {
+    max-width: 17rem;
+  }
+
+  /* The single-row nav is wider than a phone screen — wrap it into two rows:
+     icons on top, page links + theme toggle below. */
+  .nav {
+    flex-wrap: wrap;
+    padding: 0.8rem 1.25rem 0.9rem;
+    row-gap: 0.45rem;
+  }
+
+  .nav-icons {
+    gap: 1rem;
+  }
+
+  /* Bigger touch targets without changing the look: pad each icon link and
+     pull the padding back out of the layout */
+  .nav-icons a {
+    padding: 0.55rem;
+    margin: -0.55rem;
   }
 
   .nav-right {
-    gap: 0.8rem;
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.35rem;
+  }
+
+  /* Sized so the links row still fits a 320px screen */
+  .nav-link {
+    font-size: 0.92rem;
+  }
+
+  .theme-toggle {
+    padding: 0.32rem;
   }
 }
