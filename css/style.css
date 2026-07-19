@@ -485,6 +485,70 @@ a.publication-body:hover .publication-title {
 }
 
 /* ==========================================================================
+   News
+   ========================================================================== */
+
+.news-list {
+  list-style: none;
+  padding: 0;
+  margin: 1.25rem 0 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.news-item {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.news-item:last-child {
+  border-bottom: none;
+}
+
+.news-date {
+  flex-shrink: 0;
+  width: 6.5rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.news-text {
+  font-size: 0.95rem;
+}
+
+@media (max-width: 600px) {
+  .news-item {
+    flex-wrap: wrap;
+    gap: 0.1rem 1rem;
+  }
+
+  .news-date {
+    width: 100%;
+  }
+}
+
+/* "new" pill — appears on news items and fresh blog posts, ages out on its
+   own (window set in js/main.js) */
+.new-badge {
+  display: inline-block;
+  margin-left: 0.55rem;
+  padding: 0.02rem 0.5rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--bg);
+  font-family: var(--font-body);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  vertical-align: 0.14em;
+}
+
+/* ==========================================================================
    Blog / writing
    ========================================================================== */
 

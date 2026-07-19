@@ -139,6 +139,20 @@ renderExperience();
 // Blog posts — full list on /blog/, latest three on the home page
 // ---------------------------------------------------------------------------
 
+// How long items keep their "new" pill, counted from the item's date.
+// Blog posts use the publishing date only — later edits don't refresh it.
+const POST_NEW_DAYS = 14;
+const NEWS_NEW_DAYS = 30;
+
+function isNew(iso, windowDays) {
+  const ageDays = (Date.now() - new Date(iso + "T00:00:00")) / 86400000;
+  return ageDays >= 0 && ageDays <= windowDays;
+}
+
+function newBadge(iso, windowDays) {
+  return isNew(iso, windowDays) ? `<span class="new-badge">new</span>` : "";
+}
+
 function formatDate(iso) {
   return new Date(iso + "T00:00:00").toLocaleDateString("en-SG", {
     year: "numeric",
@@ -187,7 +201,7 @@ function postItem(post) {
     <li class="post-item">
       <a class="post-item-link" href="${escapeHtml(post.url)}">
         <span class="post-date">${formatDate(post.date)}</span>
-        <span class="post-title">${escapeHtml(post.title)}</span>
+        <span class="post-title">${escapeHtml(post.title)}${newBadge(post.date, POST_NEW_DAYS)}</span>
         <span class="post-tags">${postTags(post)}</span>
       </a>
     </li>
@@ -213,6 +227,7 @@ function postCard(post, index) {
           <div class="post-card-meta">
             <span>${formatDate(post.date)}</span>
             <span class="post-minutes" data-url="${escapeHtml(post.url)}"></span>
+            ${newBadge(post.date, POST_NEW_DAYS)}
           </div>
           <div class="post-card-tags">${postTags(post)}</div>
           <p class="post-card-title">${escapeHtml(post.title)}</p>
@@ -261,6 +276,41 @@ function renderPosts() {
 }
 
 renderPosts();
+
+// ---------------------------------------------------------------------------
+// News — personal updates on the home page (data lives in js/news.js).
+// Hidden while the NEWS array is empty, same pattern as the Writing section.
+// ---------------------------------------------------------------------------
+
+// Escapes the text, then turns [label](url) into links.
+function linkify(text) {
+  return escapeHtml(text).replace(
+    /\[([^\]]+)\]\(([^)\s]+)\)/g,
+    (_, label, url) =>
+      /^(https?:\/\/|\/|#)/.test(url) ? `<a href="${url}">${label}</a>` : label
+  );
+}
+
+function renderNews() {
+  const list = document.getElementById("news-list");
+  if (!list || typeof NEWS === "undefined" || NEWS.length === 0) return;
+
+  const sorted = [...NEWS].sort((a, b) => b.date.localeCompare(a.date));
+  list.innerHTML = sorted
+    .slice(0, 5)
+    .map(
+      (item) => `
+        <li class="news-item">
+          <span class="news-date">${formatDate(item.date)}</span>
+          <span class="news-text">${linkify(item.text)}${newBadge(item.date, NEWS_NEW_DAYS)}</span>
+        </li>
+      `
+    )
+    .join("");
+  document.getElementById("news").hidden = false;
+}
+
+renderNews();
 
 // ---------------------------------------------------------------------------
 // Blog post pages: auto table of contents, built from h2/h3 in .post-content.
