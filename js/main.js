@@ -141,8 +141,8 @@ renderExperience();
 
 // How long items keep their "new" pill, counted from the item's date.
 // Blog posts use the publishing date only — later edits don't refresh it.
-const POST_NEW_DAYS = 14;
-const NEWS_NEW_DAYS = 30;
+const POST_NEW_DAYS = 7;
+const NEWS_NEW_DAYS = 14;
 
 function isNew(iso, windowDays) {
   const ageDays = (Date.now() - new Date(iso + "T00:00:00")) / 86400000;
