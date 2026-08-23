@@ -15,7 +15,12 @@ const NEWS = [
     date: "2026-07-04",
     text: "Launched this site, along with my [blog](/blog/).",
   },
-  { date: "2026-08-03", 
+  { 
+    date: "2026-08-03", 
     text: "Got accepted into AISG's [Accelerated Masters Program](https://aisingapore.org/research/ai-amp/)" 
+  },
+  { 
+    date: "2026-08-20", 
+    text: "Paper accepted at EMNLP Main Conference" 
   },
 ];

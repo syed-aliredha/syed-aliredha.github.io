@@ -29,8 +29,8 @@ const PUBLICATIONS = [
     title: "SEA-SpeechBench: A Large-Scale Multitask Benchmark for Speech Understanding Across Southeast Asia",
     authors:
       "J. Liao, W. Zhang, Z. Liu, Y. He, G. Lin, X. Zou, S. Sun, Syed Ali Redha Alsagoff, D. Tao, et al.",
-    venue: "Under review",
-    note: "EMNLP 2026",
+    venue: "EMNLP 2026",
+    note: "Main Conference",
     year: 2026,
     links: {
       paper: "https://openreview.net/forum?id=YVFNC9aEuQ"
