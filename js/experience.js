@@ -16,7 +16,7 @@ const EXPERIENCE = [
     org: "Mohamed bin Zayed University of Artificial Intelligence",
     url: "https://mbzuai.ac.ae/",
     period: "Jun 2026 — Aug 2026",
-    tag: "Research",
+    tag: "Internship",
     desc: "Working under Prof. Preslav Nakov on methods for first-impression analysis of source trustworthiness from websites.",
   },
   {
