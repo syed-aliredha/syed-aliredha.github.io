@@ -19,6 +19,10 @@ const NEWS = [
     date: "2026-08-03", 
     text: "Got accepted into AISG's [Accelerated Masters Program](https://aisingapore.org/research/ai-amp/)" 
   },
+  {
+    date: "2026-08-18",
+    text: "Started as a visiting undergraduate researcher at [CopeNLU](https://copenlu.github.io/), University of Copenhagen for my Bachelor's thesis!",
+  },
   { 
     date: "2026-08-20", 
     text: "Paper accepted at EMNLP Main Conference" 

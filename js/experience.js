@@ -4,6 +4,14 @@
 
 const EXPERIENCE = [
   {
+    role: "Visiting Undergraduate Researcher",
+    org: "CopeNLU, University of Copenhagen",
+    url: "https://copenlu.github.io/",
+    period: "Aug 2026 — Present",
+    tag: "Research",
+    desc: "Working with Prof. Isabelle Augenstein and Jean Seo on the reliability and trustworthiness of large language models.",
+  },
+  {
     role: "Research Intern (UGRIP)",
     org: "Mohamed bin Zayed University of Artificial Intelligence",
     url: "https://mbzuai.ac.ae/",
