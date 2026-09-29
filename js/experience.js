@@ -15,7 +15,7 @@ const EXPERIENCE = [
     role: "Research Intern (UGRIP)",
     org: "Mohamed bin Zayed University of Artificial Intelligence",
     url: "https://mbzuai.ac.ae/",
-    period: "Jun 2026 — Aug 2026",
+    period: "Jun 2026 — Jul 2026",
     tag: "Internship",
     desc: "Working under Prof. Preslav Nakov on methods for first-impression analysis of source trustworthiness from websites.",
   },

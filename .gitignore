@@ -1,1 +1,6 @@
 .DS_Store
+
+# Comments worker
+comments-worker/node_modules/
+comments-worker/.wrangler/
+comments-worker/.dev.vars

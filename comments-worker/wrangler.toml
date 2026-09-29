@@ -1,0 +1,23 @@
+name = "site-comments"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+workers_dev = true      # serve at site-comments.syed-aliredha.workers.dev
+preview_urls = false    # no per-version preview URLs
+
+[vars]
+# Sites allowed to read/post comments (comma-separated, no trailing slashes).
+ALLOWED_ORIGINS = "https://syed-aliredha.github.io,http://localhost:4173"
+# Display name on replies you post from the /admin page.
+OWNER_NAME = "Syed Ali Redha"
+# "true": comments appear immediately and you delete bad ones at /admin.
+# "false": comments wait in /admin until you approve them (like Cusdis).
+AUTO_APPROVE = "true"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "site-comments"
+# Paste the id printed by `npx wrangler d1 create site-comments`.
+database_id = "e8b9b1f6-3c0e-40ef-aedf-8d3f129bfc20"
+
+# ADMIN_TOKEN is a secret, not a var: `npx wrangler secret put ADMIN_TOKEN`
+# (for local dev, put ADMIN_TOKEN=... in .dev.vars — it's gitignored).

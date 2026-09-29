@@ -806,15 +806,179 @@ a.publication-body:hover .publication-title {
   color: var(--accent-strong);
 }
 
-/* Comments (Cusdis widget renders in an iframe) */
+/* Comments — Cusdis-style thread rendered by initComments() in main.js */
 .comments-section {
   border-top: 1px solid var(--border);
   margin-top: 1.5rem;
 }
 
-.comments-section iframe {
+.comment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.comment-form-names {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.comment-field label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.92rem;
+}
+
+.comment-field input,
+.comment-field textarea {
+  display: block;
   width: 100%;
-  border: 0;
+  padding: 0.5rem;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  transition: border-color 0.15s ease;
+}
+
+.comment-field textarea {
+  height: 6rem;
+  resize: vertical;
+}
+
+.comment-field input:focus,
+.comment-field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.comment-hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.comment-submit {
+  align-self: flex-start;
+  padding: 0.5rem 1rem;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.comment-submit:hover {
+  border-color: var(--accent);
+  color: var(--accent-strong);
+}
+
+.comment-submit:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.comment-status {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.comment-status:empty {
+  display: none;
+}
+
+.comment-status.is-error {
+  color: #b91c1c;
+}
+
+[data-theme="dark"] .comment-status.is-error {
+  color: #f87171;
+}
+
+.comment-list {
+  margin-top: 3rem;
+}
+
+.comment-empty {
+  color: var(--text-muted);
+}
+
+.comment {
+  margin: 1rem 0;
+}
+
+/* Replies sit inside their parent, indented behind a rule */
+.comment .comment {
+  padding-left: 1rem;
+  border-left: 2px solid var(--border);
+}
+
+.comment-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.comment-author {
+  font-weight: 500;
+}
+
+.comment-badge {
+  padding: 0.05rem 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-tint);
+  border-radius: 0.25rem;
+}
+
+.comment-date {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.comment-body {
+  margin: 0.5rem 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.comment-reply-button {
+  padding: 0;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.comment-reply-button:hover {
+  color: var(--accent-strong);
+}
+
+.comment-reply-form {
+  margin-top: 1rem;
+  padding-left: 1rem;
+  border-left: 2px solid var(--border);
+}
+
+@media (max-width: 600px) {
+  .comment-form-names {
+    grid-template-columns: 1fr;
+    gap: 0.9rem;
+  }
 }
 
 .post-content blockquote {

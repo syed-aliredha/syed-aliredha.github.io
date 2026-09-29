@@ -355,70 +355,197 @@ function buildToc() {
 buildToc();
 
 // ---------------------------------------------------------------------------
-// Comments (Cusdis) — hidden until a real App ID is configured; theme follows
-// the site's light/dark toggle.
+// Comments — a Cusdis-style thread backed by our own Cloudflare Worker
+// (see comments-worker/). New comments wait for approval at <API>/admin.
+// The section stays hidden until COMMENTS_API is set.
 // ---------------------------------------------------------------------------
 
-// The Cusdis widget renders into a same-origin iframe, so we can match the
-// site font and grow the frame to fit its content (no inner scrollbar).
-function styleCommentsFrame(iframe) {
-  const doc = iframe.contentDocument;
-  if (!doc || !doc.body) return;
+const COMMENTS_API = "https://site-comments.syed-aliredha.workers.dev";
 
-  if (!doc.getElementById("site-font-patch")) {
-    const link = doc.createElement("link");
-    link.rel = "stylesheet";
-    link.href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap";
-    doc.head.appendChild(link);
+function formatCommentDate(ms) {
+  const d = new Date(ms);
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ` +
+    `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 
-    const style = doc.createElement("style");
-    style.id = "site-font-patch";
-    style.textContent =
-      "body, button, input, textarea { font-family: 'Inter', -apple-system, 'Segoe UI', sans-serif !important; }" +
-      "body { overflow: hidden; }";
-    doc.head.appendChild(style);
+function el(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
 
-    iframe.setAttribute("scrolling", "no");
-    new iframe.contentWindow.ResizeObserver(() => {
-      iframe.style.height = doc.body.scrollHeight + "px";
-    }).observe(doc.body);
+// Nickname/email are remembered so returning visitors don't retype them.
+const commenterStore = {
+  get() {
+    try { return JSON.parse(localStorage.getItem("commenter")) || {}; } catch { return {}; }
+  },
+  set(value) {
+    try { localStorage.setItem("commenter", JSON.stringify(value)); } catch {}
+  },
+};
+
+let commentFieldId = 0;
+
+function buildCommentForm(thread, parentId) {
+  const saved = commenterStore.get();
+  const uid = ++commentFieldId;
+  const form = el("form", "comment-form");
+  form.noValidate = true;
+
+  const field = (label, control) => {
+    const wrap = el("div", "comment-field");
+    const lab = el("label", "", label);
+    control.id = `comment-${control.name}-${uid}`;
+    lab.htmlFor = control.id;
+    wrap.append(lab, control);
+    return wrap;
+  };
+
+  const nickname = Object.assign(document.createElement("input"), {
+    name: "nickname", type: "text", maxLength: 60, autocomplete: "nickname", value: saved.nickname || "",
+  });
+  const email = Object.assign(document.createElement("input"), {
+    name: "email", type: "email", maxLength: 200, autocomplete: "email", value: saved.email || "",
+  });
+  const content = Object.assign(document.createElement("textarea"), {
+    name: "content", maxLength: 5000,
+  });
+  // Honeypot — hidden from people, filled in by naive spam bots.
+  const website = Object.assign(document.createElement("input"), {
+    name: "website", type: "text", tabIndex: -1, autocomplete: "off", className: "comment-hp",
+  });
+  website.setAttribute("aria-hidden", "true");
+
+  const names = el("div", "comment-form-names");
+  names.append(field("Nickname", nickname), field("Email (optional)", email));
+
+  const button = el("button", "comment-submit", "Comment");
+  button.type = "submit";
+  const status = el("p", "comment-status");
+  status.setAttribute("role", "status");
+
+  form.append(names, field("Reply...", content), website, button, status);
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    status.className = "comment-status";
+    if (!nickname.value.trim() || !content.value.trim()) {
+      status.textContent = "Please add a nickname and a comment.";
+      status.classList.add("is-error");
+      return;
+    }
+
+    button.disabled = true;
+    button.textContent = "Sending...";
+    status.textContent = "";
+    commenterStore.set({ nickname: nickname.value.trim(), email: email.value.trim() });
+
+    try {
+      const res = await fetch(`${COMMENTS_API}/api/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          pageId: thread.dataset.pageId,
+          pageUrl: location.origin + location.pathname,
+          pageTitle: thread.dataset.pageTitle || document.title,
+          parentId,
+          nickname: nickname.value,
+          email: email.value,
+          content: content.value,
+          website: website.value,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Something went wrong. Please try again.");
+      content.value = "";
+      if (data.pending) {
+        status.textContent = "Your comment has been sent. Please wait for approval.";
+      } else {
+        status.textContent = parentId ? "" : "Your comment has been posted.";
+        await loadComments(thread, thread.querySelector(".comment-list"));
+      }
+    } catch (err) {
+      status.textContent = err instanceof TypeError ? "Couldn't reach the comment server." : err.message;
+      status.classList.add("is-error");
+    } finally {
+      button.disabled = false;
+      button.textContent = "Comment";
+    }
+  });
+
+  return form;
+}
+
+function buildComment(thread, comment) {
+  const node = el("div", "comment");
+
+  const head = el("div", "comment-head");
+  head.append(el("span", "comment-author", comment.nickname));
+  if (comment.byOwner) head.append(el("span", "comment-badge", "Author"));
+
+  const time = el("time", "comment-date", formatCommentDate(comment.createdAt));
+  time.dateTime = new Date(comment.createdAt).toISOString();
+
+  node.append(head, time, el("div", "comment-body", comment.content));
+
+  comment.replies.forEach((reply) => node.append(buildComment(thread, reply)));
+
+  const replyButton = el("button", "comment-reply-button", "Reply");
+  replyButton.type = "button";
+  let replyForm = null;
+  replyButton.addEventListener("click", () => {
+    if (replyForm) {
+      replyForm.remove();
+      replyForm = null;
+      return;
+    }
+    replyForm = el("div", "comment-reply-form");
+    replyForm.append(buildCommentForm(thread, comment.id));
+    replyButton.after(replyForm);
+    replyForm.querySelector("input").focus();
+  });
+  node.append(replyButton);
+
+  return node;
+}
+
+async function loadComments(thread, list) {
+  if (!list.querySelector(".comment")) list.replaceChildren(el("p", "comment-empty", "Loading..."));
+  try {
+    const page = encodeURIComponent(thread.dataset.pageId);
+    const res = await fetch(`${COMMENTS_API}/api/comments?page=${page}`);
+    if (!res.ok) throw new Error();
+    const { comments } = await res.json();
+
+    // Replies oldest-first under their parent; top level newest-first.
+    const byId = new Map(comments.map((c) => [c.id, { ...c, replies: [] }]));
+    const roots = [];
+    byId.forEach((c) => {
+      if (!c.parentId) roots.push(c);
+      else if (byId.has(c.parentId)) byId.get(c.parentId).replies.push(c);
+    });
+    roots.reverse();
+
+    list.replaceChildren(...roots.map((c) => buildComment(thread, c)));
+  } catch {
+    list.replaceChildren(el("p", "comment-empty", "Couldn't load comments right now."));
   }
-
-  iframe.style.height = doc.body.scrollHeight + "px";
 }
 
 function initComments() {
-  const thread = document.getElementById("cusdis_thread");
+  const thread = document.getElementById("comments");
   if (!thread) return;
 
-  if (thread.dataset.appId === "YOUR_CUSDIS_APP_ID") {
+  if (!COMMENTS_API) {
     thread.closest(".comments-section").hidden = true;
     return;
   }
 
-  const currentTheme = () => document.documentElement.getAttribute("data-theme");
-  thread.dataset.theme = currentTheme();
-
-  new MutationObserver(() => {
-    if (window.CUSDIS) window.CUSDIS.setTheme(currentTheme());
-    setTimeout(() => {
-      const iframe = thread.querySelector("iframe");
-      if (iframe) styleCommentsFrame(iframe);
-    }, 400);
-  }).observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ["data-theme"],
-  });
-
-  // The widget mounts asynchronously — patch it as soon as it appears.
-  const watch = setInterval(() => {
-    const iframe = thread.querySelector("iframe");
-    if (iframe && iframe.contentDocument && iframe.contentDocument.body) {
-      styleCommentsFrame(iframe);
-      if (iframe.contentDocument.getElementById("site-font-patch")) clearInterval(watch);
-    }
-  }, 300);
-  setTimeout(() => clearInterval(watch), 15000);
+  const list = el("div", "comment-list");
+  thread.replaceChildren(buildCommentForm(thread, null), list);
+  loadComments(thread, list);
 }
 
 initComments();
