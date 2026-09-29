@@ -4,8 +4,8 @@
   "scripts": {
     "dev": "wrangler dev --port 8787",
     "deploy": "wrangler deploy",
-    "db:init": "wrangler d1 execute site-comments --remote --file schema.sql",
-    "db:init:local": "wrangler d1 execute site-comments --local --file schema.sql"
+    "db:migrate": "wrangler d1 migrations apply site-comments --remote",
+    "db:migrate:local": "wrangler d1 migrations apply site-comments --local"
   },
   "devDependencies": {
     "wrangler": "^4.143.0"

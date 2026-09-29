@@ -74,30 +74,44 @@ Same idea in `js/publications.js`:
 
 Blog comments are self-hosted: a small Cloudflare Worker + D1 database in
 `comments-worker/` (free tier), with a Cusdis-style widget rendered by `js/main.js`.
-Comments appear immediately; delete unwanted ones at `<worker-url>/admin`
-(set `AUTO_APPROVE = "false"` in `comments-worker/wrangler.toml` to hold them for approval instead).
-The comments section stays hidden until `COMMENTS_API` in `js/main.js` is set.
+Live at `https://site-comments.syed-aliredha.workers.dev` — moderate at
+[`/admin`](https://site-comments.syed-aliredha.workers.dev/admin) with your `ADMIN_TOKEN`.
 
-Each post needs a unique `data-page-id` on its `<div id="comments">` (use the file slug).
+- Comments appear immediately (set `AUTO_APPROVE = "false"` in `comments-worker/wrangler.toml`
+  to hold them for approval instead). Commenters can attach up to 4 images/GIFs.
+- Commenters can edit/delete their own comments from the browser they posted from.
+  Every edit/delete keeps the previous version — see **History** on `/admin`, where you
+  can also **Restore** a comment the commenter deleted.
+- On `/admin` you can edit, reply, remove individual images, or **Delete** — which is
+  permanent (comment + replies + images + history).
+- Each post needs a unique `data-page-id` on its `<div id="comments">` (use the file slug).
 
-**One-time setup** (needs Node 22+ — `node -v`; on older Node, prefix the wrangler
-commands with `npx -p node@22`):
+**Deploying worker changes** (Node 22+). Database changes live in `comments-worker/migrations/`;
+apply them *before* deploying code that needs them, and push the site last:
+
+```bash
+cd comments-worker
+npm run db:migrate    # applies any new migrations to the live database
+npm run deploy
+```
+
+<details><summary>One-time setup (already done)</summary>
 
 ```bash
 cd comments-worker
 npm install
 npx wrangler login                    # free Cloudflare account
 npx wrangler d1 create site-comments  # paste the printed database_id into wrangler.toml
-npm run db:init                       # create the table
+npm run db:migrate
 npx wrangler secret put ADMIN_TOKEN   # paste a long random string, e.g. from: openssl rand -hex 24
 npm run deploy                        # prints https://site-comments.<you>.workers.dev
 ```
 
-Then set `COMMENTS_API` in `js/main.js` to that URL, bump `main.js?v=` in the pages,
-and push. Sign in to `<worker-url>/admin` with your `ADMIN_TOKEN`.
+Then set `COMMENTS_API` in `js/main.js` to that URL.
+</details>
 
 **Local dev:** put `ADMIN_TOKEN=anything` in `comments-worker/.dev.vars`, run
-`npm run db:init:local && npm run dev`, and temporarily point `COMMENTS_API` at
+`npm run db:migrate:local && npm run dev`, and temporarily point `COMMENTS_API` at
 `http://127.0.0.1:8787`.
 
 ## Preview and publish

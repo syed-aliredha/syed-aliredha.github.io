@@ -864,7 +864,6 @@ a.publication-body:hover .publication-title {
 }
 
 .comment-submit {
-  align-self: flex-start;
   padding: 0.5rem 1rem;
   font: inherit;
   font-size: 0.875rem;
@@ -905,7 +904,11 @@ a.publication-body:hover .publication-title {
 }
 
 .comment-list {
-  margin-top: 3rem;
+  margin-bottom: 2.5rem;
+}
+
+.comment-list:empty {
+  margin-bottom: 0;
 }
 
 .comment-empty {
@@ -953,7 +956,7 @@ a.publication-body:hover .publication-title {
   overflow-wrap: anywhere;
 }
 
-.comment-reply-button {
+.comment-text-button {
   padding: 0;
   font: inherit;
   font-size: 0.875rem;
@@ -964,8 +967,115 @@ a.publication-body:hover .publication-title {
   cursor: pointer;
 }
 
-.comment-reply-button:hover {
+.comment-text-button:hover {
   color: var(--accent-strong);
+}
+
+.comment-text-button[hidden] {
+  display: none;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.comment-actions[hidden] {
+  display: none;
+}
+
+.comment-edited {
+  cursor: help;
+}
+
+.comment-deleted {
+  margin: 0;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+/* Attached images: a row of thumbnails, each opening the full image */
+.comment-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+}
+
+.comment-image {
+  display: block;
+  border-bottom: none;
+}
+
+.comment-image img {
+  display: block;
+  max-width: min(100%, 20rem);
+  max-height: 16rem;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+}
+
+.comment-image:hover img {
+  border-color: var(--accent);
+}
+
+.comment-image-previews {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.comment-image-previews:empty {
+  display: none;
+}
+
+.comment-image-preview {
+  position: relative;
+}
+
+.comment-image-preview img {
+  display: block;
+  width: 4.5rem;
+  height: 4.5rem;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+}
+
+.comment-image-remove {
+  position: absolute;
+  top: -0.45rem;
+  right: -0.45rem;
+  width: 1.4rem;
+  height: 1.4rem;
+  padding: 0;
+  font-size: 0.9rem;
+  line-height: 1;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.comment-image-remove:hover {
+  color: var(--accent-strong);
+  border-color: var(--accent);
+}
+
+.comment-form-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.comment-form.is-dropping textarea {
+  border-color: var(--accent);
+  border-style: dashed;
+}
+
+.comment-edit-form {
+  margin: 0.5rem 0;
 }
 
 .comment-reply-form {

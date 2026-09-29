@@ -1,4 +1,4 @@
--- Comments store. Apply with `npm run db:init` (remote) or `npm run db:init:local`.
+-- Initial comments table (already applied to the live DB via the old schema.sql).
 CREATE TABLE IF NOT EXISTS comments (
   id         TEXT PRIMARY KEY,
   page_id    TEXT NOT NULL,

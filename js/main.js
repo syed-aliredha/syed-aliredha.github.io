@@ -356,11 +356,15 @@ buildToc();
 
 // ---------------------------------------------------------------------------
 // Comments — a Cusdis-style thread backed by our own Cloudflare Worker
-// (see comments-worker/). New comments wait for approval at <API>/admin.
+// (see comments-worker/; moderate at <API>/admin). Commenters can attach
+// images/GIFs, and edit or delete their own comments from the same browser.
 // The section stays hidden until COMMENTS_API is set.
 // ---------------------------------------------------------------------------
 
 const COMMENTS_API = "https://site-comments.syed-aliredha.workers.dev";
+const MAX_COMMENT_IMAGES = 4;
+const MAX_IMAGE_BYTES = 1800000;
+const MAX_IMAGE_SIDE = 1600;
 
 function formatCommentDate(ms) {
   const d = new Date(ms);
@@ -376,162 +380,466 @@ function el(tag, className, text) {
   return node;
 }
 
-// Nickname/email are remembered so returning visitors don't retype them.
-const commenterStore = {
-  get() {
-    try { return JSON.parse(localStorage.getItem("commenter")) || {}; } catch { return {}; }
+function textButton(label, onClick) {
+  const button = el("button", "comment-text-button", label);
+  button.type = "button";
+  button.addEventListener("click", onClick);
+  return button;
+}
+
+// "commenter" remembers nickname/email; "comment-keys" maps comment id → the
+// edit key that lets this browser edit or delete that comment.
+const commentStorage = {
+  read(key) {
+    try { return JSON.parse(localStorage.getItem(key)) || {}; } catch { return {}; }
   },
-  set(value) {
-    try { localStorage.setItem("commenter", JSON.stringify(value)); } catch {}
+  write(key, value) {
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
   },
 };
 
-let commentFieldId = 0;
+function commentImageUrl(id) {
+  return `${COMMENTS_API}/api/images/${id}`;
+}
 
-function buildCommentForm(thread, parentId) {
-  const saved = commenterStore.get();
-  const uid = ++commentFieldId;
-  const form = el("form", "comment-form");
-  form.noValidate = true;
+async function postComment(path, body) {
+  let res;
+  try {
+    res = await fetch(`${COMMENTS_API}${path}`, body instanceof FormData
+      ? { method: "POST", body }
+      : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  } catch {
+    throw new Error("Couldn't reach the comment server.");
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw Object.assign(new Error(data.error || "Something went wrong. Please try again."), { status: res.status });
+  return data;
+}
 
-  const field = (label, control) => {
-    const wrap = el("div", "comment-field");
-    const lab = el("label", "", label);
-    control.id = `comment-${control.name}-${uid}`;
-    lab.htmlFor = control.id;
-    wrap.append(lab, control);
-    return wrap;
+// Photos are downscaled and re-encoded in the browser (which also strips
+// location metadata); GIFs are sent untouched so they keep animating.
+async function prepareCommentImage(file) {
+  if (!file.type.startsWith("image/")) throw new Error("Only images can be attached.");
+  if (file.type === "image/gif") {
+    if (file.size > MAX_IMAGE_BYTES) throw new Error("GIFs must be under 1.8 MB.");
+    return file;
+  }
+
+  let bitmap;
+  try {
+    bitmap = await createImageBitmap(file);
+  } catch {
+    throw new Error("That image format isn't supported — try a JPEG, PNG or GIF.");
+  }
+  const scale = Math.min(1, MAX_IMAGE_SIDE / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+
+  const encode = (type) => new Promise((resolve) => canvas.toBlob(resolve, type, 0.85));
+  let blob = await encode("image/webp");
+  if (!blob || blob.type !== "image/webp") {
+    // No WebP encoder (older Safari): JPEG on white, since JPEG has no transparency.
+    ctx.globalCompositeOperation = "destination-over";
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    blob = await encode("image/jpeg");
+  }
+  if (!blob || blob.size > MAX_IMAGE_BYTES) throw new Error("That image is too large.");
+  return blob;
+}
+
+// Thumbnails + "Add image" for a form: images already on the comment (when
+// editing) plus newly picked, pasted or dropped files.
+function buildImagePicker(existingIds, report) {
+  let kept = [...existingIds];
+  let added = [];
+  let work = Promise.resolve();
+
+  const previews = el("div", "comment-image-previews");
+  const input = Object.assign(document.createElement("input"), {
+    type: "file", accept: "image/png,image/jpeg,image/webp,image/gif", multiple: true, hidden: true,
+  });
+  const addButton = textButton("Add image", () => input.click());
+
+  const thumb = (src, onRemove) => {
+    const item = el("div", "comment-image-preview");
+    const img = el("img");
+    img.src = src;
+    img.alt = "";
+    const remove = el("button", "comment-image-remove", "×");
+    remove.type = "button";
+    remove.setAttribute("aria-label", "Remove image");
+    remove.addEventListener("click", onRemove);
+    item.append(img, remove);
+    return item;
   };
 
-  const nickname = Object.assign(document.createElement("input"), {
-    name: "nickname", type: "text", maxLength: 60, autocomplete: "nickname", value: saved.nickname || "",
-  });
-  const email = Object.assign(document.createElement("input"), {
-    name: "email", type: "email", maxLength: 200, autocomplete: "email", value: saved.email || "",
-  });
-  const content = Object.assign(document.createElement("textarea"), {
-    name: "content", maxLength: 5000,
-  });
-  // Honeypot — hidden from people, filled in by naive spam bots.
-  const website = Object.assign(document.createElement("input"), {
-    name: "website", type: "text", tabIndex: -1, autocomplete: "off", className: "comment-hp",
-  });
-  website.setAttribute("aria-hidden", "true");
+  const render = () => {
+    previews.replaceChildren(
+      ...kept.map((id) => thumb(commentImageUrl(id), () => { kept = kept.filter((k) => k !== id); render(); })),
+      ...added.map((a) => thumb(a.url, () => {
+        URL.revokeObjectURL(a.url);
+        added = added.filter((x) => x !== a);
+        render();
+      }))
+    );
+    addButton.hidden = kept.length + added.length >= MAX_COMMENT_IMAGES;
+  };
 
-  const names = el("div", "comment-form-names");
-  names.append(field("Nickname", nickname), field("Email (optional)", email));
+  const add = (files) => {
+    work = work.then(async () => {
+      for (const file of files) {
+        if (kept.length + added.length >= MAX_COMMENT_IMAGES) {
+          report(`Up to ${MAX_COMMENT_IMAGES} images per comment.`);
+          break;
+        }
+        try {
+          const blob = await prepareCommentImage(file);
+          added.push({ blob, url: URL.createObjectURL(blob) });
+          render();
+        } catch (err) {
+          report(err.message);
+        }
+      }
+    });
+    return work;
+  };
 
-  const button = el("button", "comment-submit", "Comment");
-  button.type = "submit";
+  input.addEventListener("change", () => {
+    add([...input.files]);
+    input.value = "";
+  });
+
+  render();
+  return {
+    previews,
+    addButton,
+    input,
+    add,
+    settled: () => work,
+    keptIds: () => kept,
+    appendTo(form) {
+      added.forEach((a, i) => {
+        const ext = a.blob.type.split("/")[1] || "img";
+        form.append("images", a.blob, `image-${i + 1}.${ext}`);
+      });
+      kept.forEach((id) => form.append("keepImages", id));
+    },
+    isEmpty: () => kept.length + added.length === 0,
+    reset() {
+      added.forEach((a) => URL.revokeObjectURL(a.url));
+      kept = [];
+      added = [];
+      render();
+    },
+  };
+}
+
+// Paste or drop images straight into a form.
+function acceptImageDrops(form, textarea, picker) {
+  const imagesIn = (list) => [...(list || [])].filter((f) => f.type.startsWith("image/"));
+  textarea.addEventListener("paste", (event) => {
+    const files = imagesIn(event.clipboardData && event.clipboardData.files);
+    if (files.length) {
+      event.preventDefault();
+      picker.add(files);
+    }
+  });
+  form.addEventListener("dragover", (event) => {
+    if ([...event.dataTransfer.types].includes("Files")) {
+      event.preventDefault();
+      form.classList.add("is-dropping");
+    }
+  });
+  form.addEventListener("dragleave", (event) => {
+    if (!form.contains(event.relatedTarget)) form.classList.remove("is-dropping");
+  });
+  form.addEventListener("drop", (event) => {
+    form.classList.remove("is-dropping");
+    const files = imagesIn(event.dataTransfer && event.dataTransfer.files);
+    if (files.length) {
+      event.preventDefault();
+      picker.add(files);
+    }
+  });
+}
+
+function statusLine() {
   const status = el("p", "comment-status");
   status.setAttribute("role", "status");
-
-  form.append(names, field("Reply...", content), website, button, status);
-
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    status.className = "comment-status";
-    if (!nickname.value.trim() || !content.value.trim()) {
-      status.textContent = "Please add a nickname and a comment.";
-      status.classList.add("is-error");
-      return;
-    }
-
-    button.disabled = true;
-    button.textContent = "Sending...";
-    status.textContent = "";
-    commenterStore.set({ nickname: nickname.value.trim(), email: email.value.trim() });
-
-    try {
-      const res = await fetch(`${COMMENTS_API}/api/comments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          pageId: thread.dataset.pageId,
-          pageUrl: location.origin + location.pathname,
-          pageTitle: thread.dataset.pageTitle || document.title,
-          parentId,
-          nickname: nickname.value,
-          email: email.value,
-          content: content.value,
-          website: website.value,
-        }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "Something went wrong. Please try again.");
-      content.value = "";
-      if (data.pending) {
-        status.textContent = "Your comment has been sent. Please wait for approval.";
-      } else {
-        status.textContent = parentId ? "" : "Your comment has been posted.";
-        await loadComments(thread, thread.querySelector(".comment-list"));
-      }
-    } catch (err) {
-      status.textContent = err instanceof TypeError ? "Couldn't reach the comment server." : err.message;
-      status.classList.add("is-error");
-    } finally {
-      button.disabled = false;
-      button.textContent = "Comment";
-    }
-  });
-
-  return form;
+  status.show = (message, isError) => {
+    status.textContent = message;
+    status.classList.toggle("is-error", !!isError);
+  };
+  return status;
 }
 
-function buildComment(thread, comment) {
-  const node = el("div", "comment");
+let commentFieldId = 0;
 
-  const head = el("div", "comment-head");
-  head.append(el("span", "comment-author", comment.nickname));
-  if (comment.byOwner) head.append(el("span", "comment-badge", "Author"));
+function createCommentThread(thread) {
+  const list = el("div", "comment-list");
 
-  const time = el("time", "comment-date", formatCommentDate(comment.createdAt));
-  time.dateTime = new Date(comment.createdAt).toISOString();
+  function buildCommentForm(parentId) {
+    const saved = commentStorage.read("commenter");
+    const uid = ++commentFieldId;
+    const form = el("form", "comment-form");
+    form.noValidate = true;
 
-  node.append(head, time, el("div", "comment-body", comment.content));
+    const field = (label, control) => {
+      const wrap = el("div", "comment-field");
+      const lab = el("label", "", label);
+      control.id = `comment-${control.name}-${uid}`;
+      lab.htmlFor = control.id;
+      wrap.append(lab, control);
+      return wrap;
+    };
 
-  comment.replies.forEach((reply) => node.append(buildComment(thread, reply)));
-
-  const replyButton = el("button", "comment-reply-button", "Reply");
-  replyButton.type = "button";
-  let replyForm = null;
-  replyButton.addEventListener("click", () => {
-    if (replyForm) {
-      replyForm.remove();
-      replyForm = null;
-      return;
-    }
-    replyForm = el("div", "comment-reply-form");
-    replyForm.append(buildCommentForm(thread, comment.id));
-    replyButton.after(replyForm);
-    replyForm.querySelector("input").focus();
-  });
-  node.append(replyButton);
-
-  return node;
-}
-
-async function loadComments(thread, list) {
-  if (!list.querySelector(".comment")) list.replaceChildren(el("p", "comment-empty", "Loading..."));
-  try {
-    const page = encodeURIComponent(thread.dataset.pageId);
-    const res = await fetch(`${COMMENTS_API}/api/comments?page=${page}`);
-    if (!res.ok) throw new Error();
-    const { comments } = await res.json();
-
-    // Replies oldest-first under their parent; top level newest-first.
-    const byId = new Map(comments.map((c) => [c.id, { ...c, replies: [] }]));
-    const roots = [];
-    byId.forEach((c) => {
-      if (!c.parentId) roots.push(c);
-      else if (byId.has(c.parentId)) byId.get(c.parentId).replies.push(c);
+    const nickname = Object.assign(document.createElement("input"), {
+      name: "nickname", type: "text", maxLength: 60, autocomplete: "nickname", value: saved.nickname || "",
     });
-    roots.reverse();
+    const email = Object.assign(document.createElement("input"), {
+      name: "email", type: "email", maxLength: 200, autocomplete: "email", value: saved.email || "",
+    });
+    const content = Object.assign(document.createElement("textarea"), {
+      name: "content", maxLength: 5000,
+    });
+    // Honeypot — hidden from people, filled in by naive spam bots.
+    const website = Object.assign(document.createElement("input"), {
+      name: "website", type: "text", tabIndex: -1, autocomplete: "off", className: "comment-hp",
+    });
+    website.setAttribute("aria-hidden", "true");
 
-    list.replaceChildren(...roots.map((c) => buildComment(thread, c)));
-  } catch {
-    list.replaceChildren(el("p", "comment-empty", "Couldn't load comments right now."));
+    const status = statusLine();
+    const picker = buildImagePicker([], (message) => status.show(message, true));
+    acceptImageDrops(form, content, picker);
+
+    const names = el("div", "comment-form-names");
+    names.append(field("Nickname", nickname), field("Email (optional)", email));
+
+    const button = el("button", "comment-submit", "Comment");
+    button.type = "submit";
+    const actions = el("div", "comment-form-actions");
+    actions.append(button, picker.addButton);
+
+    form.append(names, field("Reply...", content), picker.previews, picker.input, website, actions, status);
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      button.disabled = true;
+      await picker.settled();
+      if (!nickname.value.trim() || (!content.value.trim() && picker.isEmpty())) {
+        status.show("Please add a nickname and a comment or image.", true);
+        button.disabled = false;
+        return;
+      }
+
+      button.textContent = "Sending...";
+      status.show("");
+      commentStorage.write("commenter", { nickname: nickname.value.trim(), email: email.value.trim() });
+
+      const body = new FormData();
+      Object.entries({
+        pageId: thread.dataset.pageId,
+        pageUrl: location.origin + location.pathname,
+        pageTitle: thread.dataset.pageTitle || document.title,
+        parentId: parentId || "",
+        nickname: nickname.value,
+        email: email.value,
+        content: content.value,
+        website: website.value,
+      }).forEach(([key, value]) => body.append(key, value));
+      picker.appendTo(body);
+
+      try {
+        const data = await postComment("/api/comments", body);
+        if (data.id && data.editKey) {
+          const keys = commentStorage.read("comment-keys");
+          keys[data.id] = data.editKey;
+          commentStorage.write("comment-keys", keys);
+        }
+        content.value = "";
+        picker.reset();
+        if (data.pending) {
+          status.show("Your comment has been sent. Please wait for approval.");
+        } else {
+          status.show(parentId ? "" : "Your comment has been posted.");
+          await load();
+        }
+      } catch (err) {
+        status.show(err.message, true);
+      } finally {
+        button.disabled = false;
+        button.textContent = "Comment";
+      }
+    });
+
+    return form;
   }
+
+  function buildEditForm(comment, editKey, onCancel) {
+    const form = el("form", "comment-form comment-edit-form");
+    form.noValidate = true;
+    const content = Object.assign(document.createElement("textarea"), {
+      name: "content", maxLength: 5000, value: comment.content,
+    });
+    content.setAttribute("aria-label", "Edit your comment");
+    const status = statusLine();
+    const picker = buildImagePicker(comment.images, (message) => status.show(message, true));
+    acceptImageDrops(form, content, picker);
+
+    const save = el("button", "comment-submit", "Save");
+    save.type = "submit";
+    const actions = el("div", "comment-form-actions");
+    actions.append(save, picker.addButton, textButton("Cancel", onCancel));
+
+    const wrap = el("div", "comment-field");
+    wrap.append(content);
+    form.append(wrap, picker.previews, picker.input, actions, status);
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      save.disabled = true;
+      await picker.settled();
+      if (!content.value.trim() && picker.isEmpty()) {
+        status.show("A comment needs some text or an image.", true);
+        save.disabled = false;
+        return;
+      }
+      save.textContent = "Saving...";
+      const body = new FormData();
+      body.append("editKey", editKey);
+      body.append("content", content.value);
+      picker.appendTo(body);
+      try {
+        await postComment(`/api/comments/${comment.id}/edit`, body);
+        await load();
+      } catch (err) {
+        status.show(err.message, true);
+        save.disabled = false;
+        save.textContent = "Save";
+      }
+    });
+
+    return form;
+  }
+
+  function buildComment(comment) {
+    const node = el("div", "comment");
+    const replies = comment.replies.map(buildComment).filter(Boolean);
+
+    // A deleted comment only stays (as a placeholder) if replies hang off it.
+    if (comment.deleted) {
+      if (!replies.length) return null;
+      node.append(el("p", "comment-deleted", "This comment was deleted."), ...replies);
+      return node;
+    }
+
+    const head = el("div", "comment-head");
+    head.append(el("span", "comment-author", comment.nickname));
+    if (comment.byOwner) head.append(el("span", "comment-badge", "Author"));
+
+    const meta = el("div", "comment-date");
+    const time = el("time", "", formatCommentDate(comment.createdAt));
+    time.dateTime = new Date(comment.createdAt).toISOString();
+    meta.append(time);
+    if (comment.editedAt) {
+      const edited = el("span", "comment-edited", " · edited");
+      edited.title = `Edited ${formatCommentDate(comment.editedAt)}`;
+      meta.append(edited);
+    }
+
+    const content = el("div", "comment-content");
+    if (comment.content) content.append(el("div", "comment-body", comment.content));
+    if (comment.images.length) {
+      const gallery = el("div", "comment-images");
+      comment.images.forEach((id) => {
+        const link = el("a", "comment-image");
+        link.href = commentImageUrl(id);
+        link.target = "_blank";
+        link.rel = "noopener";
+        const img = el("img");
+        img.src = commentImageUrl(id);
+        img.alt = `Image from ${comment.nickname}`;
+        img.loading = "lazy";
+        link.append(img);
+        gallery.append(link);
+      });
+      content.append(gallery);
+    }
+
+    const actions = el("div", "comment-actions");
+    let replyForm = null;
+    actions.append(textButton("Reply", () => {
+      if (replyForm) {
+        replyForm.remove();
+        replyForm = null;
+        return;
+      }
+      replyForm = el("div", "comment-reply-form");
+      replyForm.append(buildCommentForm(comment.id));
+      actions.after(replyForm);
+      replyForm.querySelector("input").focus();
+    }));
+
+    const editKey = commentStorage.read("comment-keys")[comment.id];
+    if (editKey) {
+      actions.append(
+        textButton("Edit", () => {
+          const form = buildEditForm(comment, editKey, () => {
+            form.replaceWith(content);
+            actions.hidden = false;
+          });
+          content.replaceWith(form);
+          actions.hidden = true;
+          form.querySelector("textarea").focus();
+        }),
+        textButton("Delete", async () => {
+          if (!confirm("Delete your comment?")) return;
+          try {
+            await postComment(`/api/comments/${comment.id}/delete`, { editKey });
+          } catch (err) {
+            if (err.status !== 404) return alert(err.message);
+          }
+          const keys = commentStorage.read("comment-keys");
+          delete keys[comment.id];
+          commentStorage.write("comment-keys", keys);
+          await load();
+        })
+      );
+    }
+
+    node.append(head, meta, content, ...replies, actions);
+    return node;
+  }
+
+  async function load() {
+    if (!list.querySelector(".comment")) list.replaceChildren(el("p", "comment-empty", "Loading..."));
+    try {
+      const page = encodeURIComponent(thread.dataset.pageId);
+      const res = await fetch(`${COMMENTS_API}/api/comments?page=${page}`);
+      if (!res.ok) throw new Error();
+      const { comments } = await res.json();
+
+      // Oldest first, so the conversation reads down towards the form.
+      const byId = new Map(comments.map((c) => [c.id, { images: [], ...c, replies: [] }]));
+      const roots = [];
+      byId.forEach((c) => {
+        if (!c.parentId) roots.push(c);
+        else if (byId.has(c.parentId)) byId.get(c.parentId).replies.push(c);
+      });
+
+      list.replaceChildren(...roots.map(buildComment).filter(Boolean));
+    } catch {
+      list.replaceChildren(el("p", "comment-empty", "Couldn't load comments right now."));
+    }
+  }
+
+  thread.replaceChildren(list, buildCommentForm(null));
+  load();
 }
 
 function initComments() {
@@ -543,9 +851,7 @@ function initComments() {
     return;
   }
 
-  const list = el("div", "comment-list");
-  thread.replaceChildren(buildCommentForm(thread, null), list);
-  loadComments(thread, list);
+  createCommentThread(thread);
 }
 
 initComments();

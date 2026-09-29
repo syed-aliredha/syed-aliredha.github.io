@@ -66,6 +66,24 @@
     .empty, .msg { color: var(--text-muted); }
     .msg.error { color: var(--danger); }
     .top { display: flex; justify-content: space-between; align-items: baseline; }
+    .badge.muted { background: var(--bg-subtle); color: var(--text-muted); }
+    .badge.warn { background: rgba(185, 28, 28, 0.1); color: var(--danger); }
+    .card.deleted { border-style: dashed; }
+    .card.deleted .content { color: var(--text-muted); }
+    .images { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 0.75rem; }
+    .image { position: relative; }
+    .image img { display: block; max-width: 10rem; max-height: 8rem; border: 1px solid var(--border); }
+    .image button {
+      position: absolute; top: 0.25rem; right: 0.25rem; padding: 0.1rem 0.4rem;
+      font-size: 0.75rem; background: var(--bg);
+    }
+    .gone {
+      display: grid; place-items: center; width: 6rem; height: 4rem; font-size: 0.75rem;
+      color: var(--text-muted); border: 1px dashed var(--border);
+    }
+    .history { margin-top: 0.75rem; border-top: 1px solid var(--border); padding-top: 0.75rem; }
+    .history h3 { font-size: 0.85rem; font-weight: 600; margin: 0 0 0.5rem; }
+    .revision { border-left: 2px solid var(--border); padding-left: 0.75rem; margin-bottom: 0.75rem; }
   </style>
 </head>
 <body>
@@ -96,6 +114,7 @@
     const KEY = "comments-admin-token";
     let token = "";
     let status = "approved";
+    const blobUrls = new Map(); // image id → object URL (images need the admin token)
     try { token = localStorage.getItem(KEY) || ""; } catch {}
 
     const $ = (id) => document.getElementById(id);
@@ -105,8 +124,8 @@
         ...options,
         headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
       });
-      const data = await res.json().catch(() => ({}));
       if (res.status === 401) { signOut("That token didn't work."); throw new Error("unauthorized"); }
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Request failed");
       return data;
     }
@@ -132,10 +151,58 @@
       return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
     }
 
+    // Admin image fetches carry the token, so they can show removed/deleted ones too.
+    function imageEl(id, onRemove) {
+      const box = el("div", { className: "image" });
+      const img = el("img", { alt: "" });
+      const link = el("a", { target: "_blank", rel: "noopener" }, [img]);
+      box.append(link);
+      const show = (url) => { img.src = url; link.href = url; };
+      if (blobUrls.has(id)) show(blobUrls.get(id));
+      else fetch(`/api/admin/images/${id}`, { headers: { Authorization: "Bearer " + token } })
+        .then((res) => (res.ok ? res.blob() : Promise.reject()))
+        .then((blob) => { const url = URL.createObjectURL(blob); blobUrls.set(id, url); show(url); })
+        .catch(() => box.replaceWith(el("div", { className: "gone", textContent: "image removed" })));
+      if (onRemove) {
+        const remove = el("button", { className: "danger", textContent: "Remove", title: "Delete this image permanently" });
+        remove.onclick = onRemove;
+        box.append(remove);
+      }
+      return box;
+    }
+
+    const ACTIONS = { edit: "Edited", delete: "Deleted", restore: "Restored" };
+
+    async function showHistory(c, node, button) {
+      const open = node.querySelector(".history");
+      if (open) { open.remove(); return; }
+      button.disabled = true;
+      try {
+        const { revisions } = await api(`/api/admin/comments/${c.id}/history`);
+        const panel = el("div", { className: "history" }, [
+          el("h3", { textContent: "Earlier versions (newest first)" }),
+        ]);
+        revisions.forEach((r) => {
+          const who = r.actor === "owner" ? "you" : "the commenter";
+          panel.append(el("div", { className: "revision" }, [
+            el("div", { className: "meta", textContent: `${ACTIONS[r.action] || r.action} by ${who} · ${fmt(r.created_at)} — before:` }),
+            el("div", { className: "content", textContent: r.content || "(no text)" }),
+            el("div", { className: "images" }, r.image_ids.map((id) => imageEl(id))),
+          ]));
+        });
+        node.append(panel);
+      } catch (err) {
+        if (err.message !== "unauthorized") alert(err.message);
+      } finally {
+        button.disabled = false;
+      }
+    }
+
     function card(c) {
-      const who = el("span", { className: "who", textContent: c.nickname });
-      const meta = el("div", { className: "meta" }, [who]);
+      const meta = el("div", { className: "meta" }, [el("span", { className: "who", textContent: c.nickname })]);
       if (c.by_owner) meta.append(el("span", { className: "badge", textContent: "Author" }));
+      if (c.deleted_at) meta.append(el("span", { className: "badge warn", textContent: `Deleted by commenter ${fmt(c.deleted_at)}` }));
+      if (c.edited_at) meta.append(el("span", { className: "badge muted", textContent: `Edited ${fmt(c.edited_at)}` }));
       if (c.email) meta.append(" · ", el("a", { href: "mailto:" + c.email, textContent: c.email }));
       meta.append(" · " + fmt(c.created_at));
 
@@ -145,15 +212,31 @@
         : c.page_title || c.page_id);
       if (c.parent_nickname) where.append(" · replying to " + c.parent_nickname);
 
-      const actions = el("div", { className: "row" });
-      const node = el("div", { className: "card" }, [
-        meta, where, el("div", { className: "content", textContent: c.content }), actions,
-      ]);
-
       const run = async (button, fn) => {
         button.disabled = true;
         try { await fn(); await load(); }
         catch (err) { if (err.message !== "unauthorized") { alert(err.message); button.disabled = false; } }
+      };
+
+      const text = el("div", { className: "content", textContent: c.content || "(no text)" });
+      const images = el("div", { className: "images" }, c.images.map((id) => imageEl(id, (event) => {
+        if (confirm("Permanently delete this image?")) {
+          run(event.currentTarget, () => api(`/api/admin/images/${id}`, { method: "DELETE" }));
+        }
+      })));
+      const actions = el("div", { className: "row" });
+      const node = el("div", { className: "card" + (c.deleted_at ? " deleted" : "") }, [meta, where, text, images, actions]);
+
+      const openEditor = (label, initial, submit) => {
+        node.querySelector(".reply")?.remove();
+        const box = el("textarea", { value: initial });
+        const send = el("button", { textContent: label });
+        send.onclick = () => run(send, () => submit(box.value));
+        const cancel = el("button", { className: "link", textContent: "Cancel" });
+        const form = el("div", { className: "reply" }, [box, el("div", { className: "row" }, [send, cancel])]);
+        cancel.onclick = () => form.remove();
+        actions.after(form);
+        box.focus();
       };
 
       if (status === "pending") {
@@ -162,22 +245,30 @@
         actions.append(approve);
       }
 
-      const replyBtn = el("button", { textContent: status === "pending" ? "Approve & reply" : "Reply" });
-      replyBtn.onclick = () => {
-        if (node.querySelector(".reply")) return;
-        const text = el("textarea", { placeholder: "Your reply" });
-        const send = el("button", { textContent: "Post reply" });
-        send.onclick = () => run(send, () => api(`/api/admin/comments/${c.id}/reply`, {
-          method: "POST", body: JSON.stringify({ content: text.value }),
-        }));
-        node.append(el("div", { className: "reply" }, [text, el("div", { className: "row" }, [send])]));
-        text.focus();
-      };
-      actions.append(replyBtn);
+      if (c.deleted_at) {
+        const restore = el("button", { textContent: "Restore", title: "Undo the commenter's delete" });
+        restore.onclick = () => run(restore, () => api(`/api/admin/comments/${c.id}/restore`, { method: "POST" }));
+        actions.append(restore);
+      } else {
+        const reply = el("button", { textContent: status === "pending" ? "Approve & reply" : "Reply" });
+        reply.onclick = () => openEditor("Post reply", "", (content) =>
+          api(`/api/admin/comments/${c.id}/reply`, { method: "POST", body: JSON.stringify({ content }) }));
+        const edit = el("button", { textContent: "Edit" });
+        edit.onclick = () => openEditor("Save edit", c.content, (content) =>
+          api(`/api/admin/comments/${c.id}/edit`, { method: "POST", body: JSON.stringify({ content }) }));
+        actions.append(reply, edit);
+      }
+
+      if (c.revision_count) {
+        const history = el("button", { textContent: `History (${c.revision_count})` });
+        history.onclick = () => showHistory(c, node, history);
+        actions.append(history);
+      }
 
       const del = el("button", { className: "danger", textContent: "Delete" });
+      del.title = "Delete permanently, with its replies, images and history";
       del.onclick = () => {
-        if (confirm("Delete this comment and any replies under it?")) {
+        if (confirm("Permanently delete this comment, its replies, images and history?")) {
           run(del, () => api(`/api/admin/comments/${c.id}`, { method: "DELETE" }));
         }
       };
