@@ -369,7 +369,7 @@ const MAX_IMAGE_SIDE = 1600;
 function formatCommentDate(ms) {
   const d = new Date(ms);
   const pad = (n) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ` +
+  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ` +
     `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 

@@ -931,8 +931,11 @@ a.publication-body:hover .publication-title {
   gap: 0.5rem;
 }
 
+/* Names in the heading serif so they stand apart from comment text */
 .comment-author {
-  font-weight: 500;
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
 .comment-badge {
